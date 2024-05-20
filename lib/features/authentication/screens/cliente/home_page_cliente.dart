@@ -4,12 +4,22 @@ import 'reservaciones_page.dart';
 import 'perfil_page.dart';
 
 class HomePageCliente extends StatefulWidget {
+  final int initialIndex;
+
+  HomePageCliente({this.initialIndex = 0});
+
   @override
   _HomePageClienteState createState() => _HomePageClienteState();
 }
 
 class _HomePageClienteState extends State<HomePageCliente> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex;
+  }
 
   static List<Widget> _pages = <Widget>[
     ServiciosPage(),
@@ -100,6 +110,7 @@ class _HomePageClienteState extends State<HomePageCliente> {
     );
   }
 }
+
 
 
 
