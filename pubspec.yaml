@@ -1,0 +1,50 @@
+name: tuchanbape
+description: "Aplicacion de Tecnologias Moviles"
+
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.4 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Añade las dependencias necesarias aquí
+  provider: ^6.0.3
+  flutter_localizations:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  email_validator: ^2.0.1  # Para validar correos electrónicos
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+
+  # Asegúrate de tener las imágenes referenciales en tu carpeta assets
+  assets:
+    - assets/images/login_image.png
+    - assets/images/register_image.png
+    - assets/images/armarios.jpg
+    - assets/images/armarios.jpg
+    - assets/images/jonathan.jpg
+    - assets/images/manuel.jpeg
+    - assets/images/cliente01.jpg
+
+
+  fonts:
+    - family: Mont
+      fonts:
+        - asset: assets/fonts/Mont-Regular.ttf
+          weight: 700
+    - family: Mont-Bold
+      fonts:
+        - asset: assets/fonts/Mont-Bold.ttf
+          weight: 700
