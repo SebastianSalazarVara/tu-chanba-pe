@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 
+import '../login_page.dart';
 import 'change_password_page.dart';
 import 'favorite_providers_page.dart';
 import 'favorite_services_page.dart';
 import 'reviews_page.dart';
 
 class PerfilPage extends StatefulWidget {
+  final Map<String, dynamic> user;
+
+  PerfilPage({required this.user});
+
   @override
   _PerfilPageState createState() => _PerfilPageState();
 }
@@ -31,8 +36,9 @@ class _PerfilPageState extends State<PerfilPage> {
                 CircleAvatar(
                   radius: 50,
                   backgroundColor: Colors.grey[300],
-                  // Aquí puedes añadir la imagen del usuario
-                  // backgroundImage: AssetImage('ruta_a_la_imagen'),
+                  backgroundImage: widget.user['profileImage'] != null
+                      ? NetworkImage(widget.user['profileImage'])
+                      : AssetImage('assets/default_profile.png') as ImageProvider,
                 ),
                 Positioned(
                   bottom: 0,
@@ -46,8 +52,8 @@ class _PerfilPageState extends State<PerfilPage> {
               ],
             ),
             SizedBox(height: 10),
-            Text('cliente01', style: TextStyle(fontFamily: 'Mont-Bold', fontSize: 20)),
-            Text('cliente@gmail.com', style: TextStyle(fontFamily: 'Mont-Bold', fontSize: 16, color: Colors.grey)),
+            Text(widget.user['name'], style: TextStyle(fontFamily: 'Mont-Bold', fontSize: 20)),
+            Text(widget.user['email'], style: TextStyle(fontFamily: 'Mont-Bold', fontSize: 16, color: Colors.grey)),
             SizedBox(height: 30),
             _buildProfileOption(Icons.favorite, 'Servicios Favoritos', _isOptionSelected1, () {
               setState(() {
@@ -116,7 +122,7 @@ class _PerfilPageState extends State<PerfilPage> {
   }
 
   void _resetSelectionAfterDelay() {
-    Future.delayed(Duration(milliseconds: 500), () {
+    Future.delayed(Duration(milliseconds: 200), () {
       setState(() {
         _isOptionSelected1 = false;
         _isOptionSelected2 = false;
@@ -126,6 +132,22 @@ class _PerfilPageState extends State<PerfilPage> {
         _isLoggingOut = false;
       });
     });
+  }
+
+  void _navigateToFavoriteServicesPage() {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => FavoriteServicesPage()));
+  }
+
+  void _navigateToFavoriteProvidersPage() {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => FavoriteProvidersPage()));
+  }
+
+  void _navigateToReviewsPage() {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => ReviewsPage()));
+  }
+
+  void _navigateToChangePasswordPage() {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => ChangePasswordPage()));
   }
 
   void _showLogoutConfirmationDialog() {
@@ -146,6 +168,9 @@ class _PerfilPageState extends State<PerfilPage> {
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop(); // Cerrar el diálogo
+                  setState(() {
+                    _isLoggingOut = false;
+                  });
                 },
                 child: Text('Cancelar', style: TextStyle(color: Colors.black)),
                 style: TextButton.styleFrom(
@@ -156,7 +181,7 @@ class _PerfilPageState extends State<PerfilPage> {
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop(); // Cerrar el diálogo
-                  Navigator.of(context).pushReplacementNamed('/'); // Navegar a la página raíz
+                  _logout(); // Ejecutar la función de cierre de sesión
                 },
                 child: Text('Confirmar', style: TextStyle(color: Colors.white)),
                 style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF3F60A0)),
@@ -173,33 +198,7 @@ class _PerfilPageState extends State<PerfilPage> {
     });
   }
 
-  void _navigateToFavoriteServicesPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => FavoriteServicesPage()),
-    );
+  void _logout() {
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
   }
-
-  void _navigateToFavoriteProvidersPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => FavoriteProvidersPage()),
-    );
-  }
-
-  void _navigateToReviewsPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => ReviewsPage()),
-    );
-  }
-
-  void _navigateToChangePasswordPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => ChangePasswordPage()),
-    );
-  }
-
 }
-

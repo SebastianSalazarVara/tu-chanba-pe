@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
 import 'login_page.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
@@ -10,6 +12,49 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   bool _isPressed = false;
   bool _isLoginHover = false;
   bool _isAccountHover = false;
+  TextEditingController _emailController = TextEditingController();
+  String _message = '';
+
+  Future<Database> _initializeDatabase() async {
+    return openDatabase(
+      join(await getDatabasesPath(), 'user_database.db'),
+      version: 1,
+    );
+  }
+
+  Future<bool> _isEmailRegistered(String email) async {
+    final db = await _initializeDatabase();
+    final List<Map<String, dynamic>> result = await db.query(
+      'users',
+      where: 'email = ?',
+      whereArgs: [email],
+    );
+    return result.isNotEmpty;
+  }
+
+  void _sendRecoveryEmail() async {
+    String email = _emailController.text;
+
+    if (email.isEmpty) {
+      setState(() {
+        _message = 'Por favor ingresa un correo electrónico';
+      });
+      return;
+    }
+
+    bool isRegistered = await _isEmailRegistered(email);
+
+    if (isRegistered) {
+      setState(() {
+        _message = 'Se ha enviado el correo de recuperación';
+      });
+      // Lógica para enviar el correo de recuperación va aquí
+    } else {
+      setState(() {
+        _message = 'El correo electrónico no está registrado';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,15 +83,16 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   ),
                   SizedBox(height: 20),
                   TextField(
+                    controller: _emailController,
                     decoration: InputDecoration(
                       labelText: 'Correo electrónico',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Color(0xFFF5F5F5)), // Color del borde predeterminado
+                        borderSide: BorderSide(color: Color(0xFFF5F5F5)),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Color(0xFF6286CB)), // Color del borde cuando está enfocado
+                        borderSide: BorderSide(color: Color(0xFF6286CB)),
                       ),
                       contentPadding: EdgeInsets.symmetric(horizontal: 16),
                     ),
@@ -69,11 +115,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         _isPressed = false;
                       });
                     },
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Se ha enviado el correo de recuperación')),
-                      );
-                    },
+                    onTap: _sendRecoveryEmail,
                     child: Container(
                       decoration: BoxDecoration(
                         color: _isPressed ? Color(0xFF2E4A7D) : Color(0xFF3F60A0),
@@ -91,6 +133,16 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         ),
                       ),
                     ),
+                  ),
+                  SizedBox(height: 20),
+                  Text(
+                    _message,
+                    style: TextStyle(
+                      color: _message == 'Se ha enviado el correo de recuperación' ? Colors.green : Colors.red,
+                      fontFamily: 'Mont',
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
                 ],
               ),
@@ -112,7 +164,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   child: GestureDetector(
                     onTap: () {},
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 1, vertical: 8), // Ajustar el padding
+                      padding: EdgeInsets.symmetric(horizontal: 1, vertical: 8),
                       color: Colors.transparent,
                       child: Text(
                         '¿Ya tienes cuenta? ',
@@ -141,7 +193,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
                     },
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 1, vertical: 8), // Ajustar el padding
+                      padding: EdgeInsets.symmetric(horizontal: 1, vertical: 8),
                       color: Colors.transparent,
                       child: Text(
                         'Iniciar sesión',
@@ -162,13 +214,3 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-

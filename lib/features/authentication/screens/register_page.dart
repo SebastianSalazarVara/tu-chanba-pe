@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'login_page.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
+import 'login_page.dart';
 
 class RegisterPage extends StatefulWidget {
   @override
@@ -16,6 +18,12 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _termsChecked = false;
   bool _isLoginHover = false;
   bool _isAccountHover = false;
+  String? _selectedUserType;
+  String? _email;
+  String? _nombres;
+  String? _apellidos;
+  String? _contact;
+  bool _showUserTypeError = false;
 
   // Variables para la validación de la contraseña
   bool _isLengthValid = false;
@@ -32,26 +40,90 @@ class _RegisterPageState extends State<RegisterPage> {
     });
   }
 
-  void _register() {
-    if (_formKey.currentState!.validate() && _termsChecked) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text("Registro exitoso"),
-            content: Text("¡Tu cuenta ha sido creada con éxito!"),
-            actions: [
-              TextButton(
-                child: Text("OK"),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
-                },
-              ),
-            ],
-          );
-        },
+  Future<Database> _initializeDatabase() async {
+    return openDatabase(
+      join(await getDatabasesPath(), 'user_database.db'),
+      onCreate: (db, version) {
+        return db.execute(
+          "CREATE TABLE users(email TEXT PRIMARY KEY, nombres TEXT, apellidos TEXT, userType TEXT, contact TEXT, password TEXT, profilePhoto TEXT)",
+        );
+      },
+      version: 1,
+    );
+  }
+
+  Future<void> _registerUser(String email, String nombres, String apellidos, String userType, String contact, String password) async {
+    final db = await _initializeDatabase();
+
+    try {
+      await db.insert(
+        'users',
+        {'email': email, 'nombres': nombres, 'apellidos': apellidos, 'userType': userType, 'contact': contact, 'password': password, 'profilePhoto': ''},
+        conflictAlgorithm: ConflictAlgorithm.fail,
       );
+    } catch (e) {
+      throw Exception('El correo ya está registrado.');
+    }
+  }
+
+  void _showDialog(String title, String content) {
+    showDialog(
+      context: _formKey.currentContext!,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(content),
+          actions: [
+            TextButton(
+              child: Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginPage()),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(_formKey.currentContext!).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  void _register() async {
+    setState(() {
+      _showUserTypeError = _selectedUserType == null;
+    });
+
+    if (_formKey.currentState!.validate() && _selectedUserType != null && _termsChecked) {
+      _formKey.currentState!.save();
+      try {
+        await _registerUser(
+          _email!,
+          _nombres!,
+          _apellidos!,
+          _selectedUserType!,
+          _contact!,
+          _passwordController.text,
+        );
+
+        _showDialog("Registro exitoso", "¡Tu cuenta ha sido creada con éxito!");
+      } catch (e) {
+        _showSnackBar(e.toString());
+      }
+    } else {
+      if (_selectedUserType == null) {
+        _showSnackBar('Por favor elige un tipo de usuario');
+      }
+      if (!_termsChecked) {
+        _showSnackBar('Por favor acepta los términos y condiciones');
+      }
     }
   }
 
@@ -79,9 +151,58 @@ class _RegisterPageState extends State<RegisterPage> {
                 SizedBox(height: 20),
                 Text('Crea tu cuenta para una mejor experiencia', textAlign: TextAlign.center),
                 SizedBox(height: 20),
-                DropdownButtonFormField(
+                FormField<String>(
+                  builder: (FormFieldState<String> state) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        InputDecorator(
+                          decoration: InputDecoration(
+                            labelText: 'Tipo de Usuario',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide(color: Color(0xFFF5F5F5)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide(color: Color(0xFF6286CB)),
+                            ),
+                            contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              value: _selectedUserType,
+                              isDense: true,
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  _selectedUserType = newValue;
+                                  state.didChange(newValue);
+                                  _showUserTypeError = false;
+                                });
+                              },
+                              items: [
+                                DropdownMenuItem(child: Text('Proveedor'), value: 'Proveedor'),
+                                DropdownMenuItem(child: Text('Cliente'), value: 'Cliente'),
+                              ],
+                            ),
+                          ),
+                        ),
+                        if (_showUserTypeError)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              'Por favor elige un tipo de usuario',
+                              style: TextStyle(color: Colors.red.shade700, fontSize: 12.0),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                ),
+                SizedBox(height: 20),
+                TextFormField(
                   decoration: InputDecoration(
-                    labelText: 'Tipo de Usuario',
+                    labelText: 'Nombres',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide(color: Color(0xFFF5F5F5)),
@@ -92,125 +213,98 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     contentPadding: EdgeInsets.symmetric(horizontal: 16),
                   ),
-                  items: [
-                    DropdownMenuItem(child: Text('Proveedor'), value: 'Proveedor'),
-                    DropdownMenuItem(child: Text('Cliente'), value: 'Cliente'),
-                  ],
-                  onChanged: (value) {},
-                ),
-                SizedBox(height: 20),
-                Focus(
-                  onFocusChange: (hasFocus) {
-                    if (!hasFocus) _formKey.currentState!.validate();
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor ingresa tu nombre';
+                    } else if (!RegExp(r"^[a-zA-Z\s]+$").hasMatch(value)) {
+                      return 'El nombre solo puede contener letras y espacios';
+                    }
+                    return null;
                   },
-                  child: TextFormField(
-                    decoration: InputDecoration(
-                      labelText: 'Nombres',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Color(0xFFF5F5F5)),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Color(0xFF6286CB)),
-                      ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor ingresa tu nombre';
-                      } else if (!RegExp(r"^[a-zA-Z\s]+$").hasMatch(value)) {
-                        return 'El nombre solo puede contener letras y espacios';
-                      }
-                      return null;
-                    },
-                  ),
+                  onSaved: (value) {
+                    _nombres = value;
+                  },
                 ),
                 SizedBox(height: 10),
-                Focus(
-                  onFocusChange: (hasFocus) {
-                    if (!hasFocus) _formKey.currentState!.validate();
-                  },
-                  child: TextFormField(
-                    decoration: InputDecoration(
-                      labelText: 'Apellidos',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Color(0xFFF5F5F5)),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Color(0xFF6286CB)),
-                      ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                TextFormField(
+                  decoration: InputDecoration(
+                    labelText: 'Apellidos',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: Color(0xFFF5F5F5)),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor ingresa tus apellidos';
-                      } else if (!RegExp(r"^[a-zA-Z\s]+$").hasMatch(value)) {
-                        return 'El apellido solo puede contener letras y espacios';
-                      }
-                      return null;
-                    },
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: Color(0xFF6286CB)),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16),
                   ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor ingresa tus apellidos';
+                    } else if (!RegExp(r"^[a-zA-Z\s]+$").hasMatch(value)) {
+                      return 'El apellido solo puede contener letras y espacios';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    _apellidos = value;
+                  },
                 ),
                 SizedBox(height: 10),
-                Focus(
-                  onFocusChange: (hasFocus) {
-                    if (!hasFocus) _formKey.currentState!.validate();
-                  },
-                  child: TextFormField(
-                    decoration: InputDecoration(
-                      labelText: 'Dirección de correo',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Color(0xFFF5F5F5)),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Color(0xFF6286CB)),
-                      ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                TextFormField(
+                  decoration: InputDecoration(
+                    labelText: 'Dirección de correo',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: Color(0xFFF5F5F5)),
                     ),
-                    validator: (value) {
-                      if (value == null || !EmailValidator.validate(value)) {
-                        return 'Por favor ingresa un correo válido';
-                      }
-                      return null;
-                    },
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: Color(0xFF6286CB)),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16),
                   ),
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) {
+                    if (value == null || !EmailValidator.validate(value)) {
+                      return 'Por favor ingresa un correo válido';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    _email = value;
+                  },
                 ),
                 SizedBox(height: 10),
-                Focus(
-                  onFocusChange: (hasFocus) {
-                    if (!hasFocus) _formKey.currentState!.validate();
-                  },
-                  child: TextFormField(
-                    decoration: InputDecoration(
-                      labelText: 'Número de Contacto',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Color(0xFFF5F5F5)),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Color(0xFF6286CB)),
-                      ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                TextFormField(
+                  decoration: InputDecoration(
+                    labelText: 'Número de Contacto',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: Color(0xFFF5F5F5)),
                     ),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor ingresa tu número de contacto';
-                      } else if (!RegExp(r"^[0-9]{1,9}$").hasMatch(value)) {
-                        return 'El número de contacto debe contener solo números y un máximo de 9 dígitos';
-                      }
-                      return null;
-                    },
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: Color(0xFF6286CB)),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16),
                   ),
+                  keyboardType: TextInputType.phone,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor ingresa tu número de contacto';
+                    } else if (!RegExp(r"^[0-9]{1,9}$").hasMatch(value)) {
+                      return 'El número de contacto debe contener solo números y un máximo de 9 dígitos';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    _contact = value;
+                  },
                 ),
                 SizedBox(height: 10),
-                TextField(
+                TextFormField(
                   controller: _passwordController,
                   decoration: InputDecoration(
                     labelText: 'Contraseña',
@@ -359,7 +453,10 @@ class _RegisterPageState extends State<RegisterPage> {
                       },
                       child: GestureDetector(
                         onTap: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => LoginPage()),
+                          );
                         },
                         child: Container(
                           padding: EdgeInsets.symmetric(horizontal: 1, vertical: 8),

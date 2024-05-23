@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'features/authentication/screens/cliente/perfil_page.dart';
 import 'features/authentication/screens/login_page.dart';
 import 'features/authentication/screens/forgot_password_page.dart';
 import 'features/authentication/screens/register_page.dart'; // Asegúrate de importar PerfilPage
@@ -38,7 +37,6 @@ class MyApp extends StatelessWidget {
         '/': (context) => LoginPage(),
         '/forgot_password': (context) => ForgotPasswordPage(),
         '/register': (context) => RegisterPage(),
-        '/perfil': (context) => PerfilPage(),  // Añadir la ruta para PerfilPage
       },
     );
   }

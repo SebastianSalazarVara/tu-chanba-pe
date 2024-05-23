@@ -5,8 +5,9 @@ import 'perfil_page.dart';
 
 class HomePageCliente extends StatefulWidget {
   final int initialIndex;
+  final Map<String, dynamic> user;
 
-  HomePageCliente({this.initialIndex = 0});
+  HomePageCliente({this.initialIndex = 0, required this.user});
 
   @override
   _HomePageClienteState createState() => _HomePageClienteState();
@@ -14,18 +15,20 @@ class HomePageCliente extends StatefulWidget {
 
 class _HomePageClienteState extends State<HomePageCliente> {
   late int _selectedIndex;
+  late Map<String, dynamic> _user;
+  late List<Widget> _pages;
 
   @override
   void initState() {
     super.initState();
     _selectedIndex = widget.initialIndex;
+    _user = widget.user;
+    _pages = [
+      ServiciosPage(),
+      ReservacionesPage(),
+      PerfilPage(user: widget.user), // Aquí puedes usar widget.user
+    ];
   }
-
-  static List<Widget> _pages = <Widget>[
-    ServiciosPage(),
-    ReservacionesPage(),
-    PerfilPage(),
-  ];
 
   void _onItemTapped(int index) {
     setState(() {
@@ -57,7 +60,15 @@ class _HomePageClienteState extends State<HomePageCliente> {
           ),
         ],
       ),
-      body: _pages[_selectedIndex],
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _pages.map((page) {
+          if (page is PerfilPage) {
+            return PerfilPage(user: _user);
+          }
+          return page;
+        }).toList(),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Color(0xFF6286CB),
         selectedItemColor: Colors.white,
@@ -110,7 +121,3 @@ class _HomePageClienteState extends State<HomePageCliente> {
     );
   }
 }
-
-
-
-

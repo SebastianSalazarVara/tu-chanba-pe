@@ -1,12 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:tuchanbape/features/authentication/screens/proveedor/pagos_page.dart';
+import 'package:tuchanbape/features/authentication/screens/proveedor/reservaciones_page.dart';
+import 'perfil_page.dart';  // Importa PerfilPage
 
 class HomePageProveedor extends StatefulWidget {
+  final int initialIndex;
+  final Map<String, dynamic> user;
+
+  HomePageProveedor({this.initialIndex = 0, required this.user});
+
   @override
   _HomePageProveedorState createState() => _HomePageProveedorState();
 }
 
 class _HomePageProveedorState extends State<HomePageProveedor> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
+  late Map<String, dynamic> _user;
+  late List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex;
+    _user = widget.user;
+    _pages = [
+      PagosPage(),
+      ReservacionesPage(),
+      PerfilPage(user: widget.user), // Aquí puedes usar widget.user
+    ];
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -38,11 +60,14 @@ class _HomePageProveedorState extends State<HomePageProveedor> {
           ),
         ],
       ),
-      body: Center(
-        child: Text(
-          'Contenido de la página de proveedor',
-          style: TextStyle(fontFamily: 'Mont-Bold', fontSize: 20),
-        ),
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _pages.map((page) {
+          if (page is PerfilPage) {
+            return PerfilPage(user: _user);
+          }
+          return page;
+        }).toList(),
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Color(0xFF6286CB),
@@ -96,5 +121,3 @@ class _HomePageProveedorState extends State<HomePageProveedor> {
     );
   }
 }
-
-

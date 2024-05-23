@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'home_page_cliente.dart'; // Importa la HomePageCliente que contiene la navegación por pestañas
+import 'home_page_proveedor.dart'; // Importa la HomePageCliente que contiene la navegación por pestañas
 
 class ChangePasswordPage extends StatefulWidget {
   @override
@@ -93,11 +93,11 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               SizedBox(width: 20),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).pop(); // Cerrar el diálogo
+                  Navigator.of(context).pop(); // Cerrar el diálogo++++++++++++++++++++
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => HomePageCliente(initialIndex: 2, user: {},), // Navega a HomePageCliente con el índice 2 (Perfil)
+                      builder: (context) => HomePageProveedor(initialIndex: 2, user: {},), // Navega a HomePageCliente con el índice 2 (Perfil)
                     ),
                         (Route<dynamic> route) => false, // Elimina todas las rutas anteriores
                   );

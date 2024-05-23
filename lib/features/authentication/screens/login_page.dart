@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
 import 'forgot_password_page.dart';
 import 'register_page.dart';
 import 'proveedor/home_page_proveedor.dart'; // Página de inicio para proveedores
@@ -14,11 +16,9 @@ class _LoginPageState extends State<LoginPage> {
   bool _isForgotPasswordHover = false;
   bool _isRegisterHover = false;
 
-  // Controladores para los campos de texto
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  // Variables para controlar la visibilidad de la contraseña y los mensajes de error
   bool _isPasswordVisible = false;
   bool _isEmailValid = true;
   bool _isPasswordValid = true;
@@ -26,34 +26,77 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
-    // Limpiar los controladores cuando se destruye el widget
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  void _login() {
+  Future<Database> _initializeDatabase() async {
+    return openDatabase(
+      join(await getDatabasesPath(), 'user_database.db'),
+    );
+  }
+
+  Future<String?> _getUserType(String email) async {
+    final db = await _initializeDatabase();
+    final List<Map<String, dynamic>> maps = await db.query(
+      'users',
+      columns: ['userType'],
+      where: 'email = ?',
+      whereArgs: [email],
+    );
+
+    if (maps.isNotEmpty) {
+      return maps.first['userType'];
+    } else {
+      return null;
+    }
+  }
+
+  void _redirectToHome(String userType, BuildContext context, Map<String, dynamic> userInfo) {
+    if (userType == 'Proveedor') {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomePageProveedor(user: userInfo)),
+      );
+    } else if (userType == 'Cliente') {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomePageCliente(user: userInfo)),
+      );
+    }
+  }
+
+  void _login(BuildContext context) async {
     setState(() {
       _isEmailValid = _emailController.text.isNotEmpty;
       _isPasswordValid = _passwordController.text.isNotEmpty;
       _isCredentialsValid = true;
-
-      if (_isEmailValid && _isPasswordValid) {
-        if (_emailController.text == 'proveedor@gmail.com' && _passwordController.text == '123456') {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => HomePageProveedor()),
-          );
-        } else if (_emailController.text == 'cliente@gmail.com' && _passwordController.text == '123456') {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => HomePageCliente()),
-          );
-        } else {
-          _isCredentialsValid = false;
-        }
-      }
     });
+
+    if (_isEmailValid && _isPasswordValid) {
+      final db = await _initializeDatabase();
+      final List<Map<String, dynamic>> maps = await db.query(
+        'users',
+        columns: ['email', 'password', 'userType', 'nombres', 'apellidos'],
+        where: 'email = ? AND password = ?',
+        whereArgs: [_emailController.text, _passwordController.text],
+      );
+
+      if (maps.isNotEmpty) {
+        String userType = maps.first['userType'];
+        String name = "${maps.first['nombres']} ${maps.first['apellidos']}";
+        Map<String, dynamic> userInfo = {
+          'email': maps.first['email'],
+          'name': name,
+        };
+        _redirectToHome(userType, context, userInfo);
+      } else {
+        setState(() {
+          _isCredentialsValid = false;
+        });
+      }
+    }
   }
 
   @override
@@ -88,6 +131,7 @@ class _LoginPageState extends State<LoginPage> {
                   children: [
                     TextField(
                       controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
                         labelText: 'Ingresar Email',
                         border: OutlineInputBorder(
@@ -191,7 +235,7 @@ class _LoginPageState extends State<LoginPage> {
                           _isLoginPressed = false;
                         });
                       },
-                      onTap: _login,
+                      onTap: () => _login(context),
                       child: Container(
                         decoration: BoxDecoration(
                           color: _isLoginPressed ? Color(0xFF2E4A7D) : Color(0xFF3F60A0),
@@ -217,15 +261,10 @@ class _LoginPageState extends State<LoginPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => RegisterPage()));
-                    },
-                    child: Text(
-                      '¿No tienes cuenta? ',
-                      style: TextStyle(color: Colors.black, fontFamily: 'Mont'),
-                      textAlign: TextAlign.center,
-                    ),
+                  Text(
+                    '¿No tienes cuenta? ',
+                    style: TextStyle(color: Colors.black, fontFamily: 'Mont'),
+                    textAlign: TextAlign.center,
                   ),
                   MouseRegion(
                     onEnter: (_) {
@@ -240,21 +279,22 @@ class _LoginPageState extends State<LoginPage> {
                     },
                     child: GestureDetector(
                       onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => RegisterPage()));
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => RegisterPage()),
+                        );
                       },
                       child: Text(
-                        'Regístrate ahora',
+                        'Regístrate',
                         style: TextStyle(
                           color: _isRegisterHover ? Color(0xFFFF914D) : Colors.blue,
                           fontFamily: 'Mont',
                         ),
-                        textAlign: TextAlign.center,
                       ),
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: 20),
             ],
           ),
         ),
