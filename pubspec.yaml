@@ -34,7 +34,7 @@ flutter:
   assets:
     - assets/images/login_image.png
     - assets/images/register_image.png
-    - assets/images/armarios.jpg
+    - assets/images/armarios.png
     - assets/images/pisos.jpg
     - assets/images/jonathan.jpg
     - assets/images/manuel.jpeg

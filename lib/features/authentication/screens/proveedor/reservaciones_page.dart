@@ -40,12 +40,20 @@ class _ReservacionesPageState extends State<ReservacionesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Reservaciones'),
         actions: [
-          IconButton(
-            icon: Icon(Icons.filter_list),
-            color: Color(0xFF6286CB),
-            onPressed: () => _mostrarFiltros(context),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: GestureDetector(
+              onTap: () => _mostrarFiltros(context),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Color(0xFF6286CB),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: EdgeInsets.all(8),
+                child: Icon(Icons.filter_list, color: Colors.white),
+              ),
+            ),
           ),
         ],
       ),
@@ -67,37 +75,101 @@ class _ReservacionesPageState extends State<ReservacionesPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CircleAvatar(
-                  backgroundImage: AssetImage('assets/images/armarios.png'),
-                  radius: 24,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: Image.asset(
+                    'assets/images/armarios.png',
+                    width: 82,
+                    height: 82,
+                    fit: BoxFit.cover,
+                  ),
                 ),
                 SizedBox(width: 8),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: reserva['estado'] == "Completado" ? Colors.green : Colors.blue,
-                        borderRadius: BorderRadius.circular(8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: reserva['estado'] == "Completado" ? Colors.green : Colors.blue,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              reserva['estado'],
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                          Text(
+                            reserva['id'],
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF6286CB),
+                            ),
+                          ),
+                        ],
                       ),
-                      child: Text(
-                        reserva['estado'],
-                        style: TextStyle(color: Colors.white),
+                      SizedBox(height: 8),
+                      Text(
+                        "Armarios y vestidores a medida",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Mont-Bold',
+                        ),
                       ),
-                    ),
-                    Text(reserva['id']),
-                  ],
+                      Text(
+                        reserva['precio'],
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green[800],
+                          fontFamily: 'Mont-Bold',
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
             SizedBox(height: 8),
-            Text(reserva['precio'], style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            SizedBox(height: 4),
-            Text("Dirección: ${reserva['direccion']}"),
-            Text("Día y Hora: ${reserva['fecha']}"),
-            Text("Cliente: ${reserva['cliente']}"),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("Dirección:", style: TextStyle(fontWeight: FontWeight.bold)),
+                Expanded(
+                  child: Text(
+                    reserva['direccion'],
+                    textAlign: TextAlign.right,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("Día y Hora:", style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(
+                  reserva['fecha'],
+                  textAlign: TextAlign.right,
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("Cliente:", style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(
+                  reserva['cliente'],
+                  textAlign: TextAlign.right,
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -180,4 +252,5 @@ void main() {
     home: ReservacionesPage(),
   ));
 }
+
 

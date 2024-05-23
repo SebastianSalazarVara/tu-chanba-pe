@@ -72,7 +72,7 @@ class _ServiciosPageState extends State<ServiciosPage> {
                         borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
                         child: Image.asset(
                           index == 0
-                              ? 'assets/images/armarios.jpg'
+                              ? 'assets/images/armarios.png'
                               : 'assets/images/pisos.jpg',
                           height: 180,
                           width: double.infinity,

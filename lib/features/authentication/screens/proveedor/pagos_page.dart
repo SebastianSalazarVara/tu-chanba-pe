@@ -20,7 +20,7 @@ class PagosPage extends StatelessWidget {
     },
     {
       'nombre': 'Mateo Rojas',
-      'idPago': '#01017',
+      'idPago': '#01009',
       'idIdentificacion': '#00998',
       'estadoPago': 'Pago Adelantado',
       'metodoPago': 'Presencial',
@@ -46,9 +46,30 @@ class PagosPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    pago['nombre'],
-                    style: TextStyle(fontFamily: 'Mont-Bold', fontSize: 18, color: Colors.black),
+                  Container(
+                    color: Color(0xFFD6E4FF),
+                    padding: EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          pago['nombre'],
+                          style: TextStyle(
+                            fontFamily: 'Mont-Bold',
+                            fontSize: 18,
+                            color: Colors.black,
+                          ),
+                        ),
+                        Text(
+                          pago['idPago'],
+                          style: TextStyle(
+                            fontFamily: 'Mont-Bold',
+                            fontSize: 18,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   SizedBox(height: 8),
                   Row(
@@ -56,11 +77,19 @@ class PagosPage extends StatelessWidget {
                     children: [
                       Text(
                         'Identificación de Pago',
-                        style: TextStyle(fontFamily: 'Mont-Regular', fontSize: 14, color: Colors.grey[600]),
+                        style: TextStyle(
+                          fontFamily: 'Mont-Regular',
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
                       ),
                       Text(
-                        pago['idPago'],
-                        style: TextStyle(fontFamily: 'Mont-Bold', fontSize: 14, color: Colors.blue),
+                        pago['idIdentificacion'],
+                        style: TextStyle(
+                          fontFamily: 'Mont-Bold',
+                          fontSize: 14,
+                          color: Colors.blue,
+                        ),
                       ),
                     ],
                   ),
@@ -70,11 +99,19 @@ class PagosPage extends StatelessWidget {
                     children: [
                       Text(
                         'Estado del Pago',
-                        style: TextStyle(fontFamily: 'Mont-Regular', fontSize: 14, color: Colors.grey[600]),
+                        style: TextStyle(
+                          fontFamily: 'Mont-Regular',
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
                       ),
                       Text(
                         pago['estadoPago'],
-                        style: TextStyle(fontFamily: 'Mont-Bold', fontSize: 14, color: Colors.black),
+                        style: TextStyle(
+                          fontFamily: 'Mont-Bold',
+                          fontSize: 14,
+                          color: Colors.black,
+                        ),
                       ),
                     ],
                   ),
@@ -84,11 +121,19 @@ class PagosPage extends StatelessWidget {
                     children: [
                       Text(
                         'Método de Pago',
-                        style: TextStyle(fontFamily: 'Mont-Regular', fontSize: 14, color: Colors.grey[600]),
+                        style: TextStyle(
+                          fontFamily: 'Mont-Regular',
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
                       ),
                       Text(
                         pago['metodoPago'],
-                        style: TextStyle(fontFamily: 'Mont-Bold', fontSize: 14, color: Colors.black),
+                        style: TextStyle(
+                          fontFamily: 'Mont-Bold',
+                          fontSize: 14,
+                          color: Colors.black,
+                        ),
                       ),
                     ],
                   ),
@@ -98,11 +143,19 @@ class PagosPage extends StatelessWidget {
                     children: [
                       Text(
                         'Cantidad',
-                        style: TextStyle(fontFamily: 'Mont-Regular', fontSize: 14, color: Colors.grey[600]),
+                        style: TextStyle(
+                          fontFamily: 'Mont-Regular',
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
                       ),
                       Text(
                         pago['cantidad'],
-                        style: TextStyle(fontFamily: 'Mont-Bold', fontSize: 14, color: Colors.black),
+                        style: TextStyle(
+                          fontFamily: 'Mont-Bold',
+                          fontSize: 14,
+                          color: Color(0xFF6286CB),
+                        ),
                       ),
                     ],
                   ),
