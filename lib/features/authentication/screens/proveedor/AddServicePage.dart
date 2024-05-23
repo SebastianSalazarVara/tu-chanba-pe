@@ -11,7 +11,7 @@ class _AddServicePageState extends State<AddServicePage> {
   final _formKey = GlobalKey<FormState>();
   String? _selectedCategory;
   String? _selectedSubCategory;
-  String? _selectedDistrict;
+  List<String> _selectedDistricts = [];
   bool _isPrepaid = false;
   bool _isActive = true;
   File? _image;
@@ -187,6 +187,48 @@ class _AddServicePageState extends State<AddServicePage> {
     }
   }
 
+  Future<void> _selectDistricts(BuildContext context) async {
+    List<String> selected = List.from(_selectedDistricts);
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Seleccionar Distritos'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: _districts.map((district) {
+                return CheckboxListTile(
+                  title: Text(district),
+                  value: selected.contains(district),
+                  onChanged: (bool? value) {
+                    setState(() {
+                      if (value == true) {
+                        selected.add(district);
+                      } else {
+                        selected.remove(district);
+                      }
+                    });
+                  },
+                );
+              }).toList(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _selectedDistricts = selected;
+                });
+                Navigator.of(context).pop();
+              },
+              child: Text('Aceptar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   InputDecoration _buildInputDecoration(String labelText) {
     return InputDecoration(
       labelText: labelText,
@@ -209,7 +251,14 @@ class _AddServicePageState extends State<AddServicePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xFF6286CB),
-        title: Text('Agregar Servicio'),
+        title: Text(
+          'Agregar Servicio',
+          style: TextStyle(
+            fontFamily: 'Mont',
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
@@ -316,6 +365,7 @@ class _AddServicePageState extends State<AddServicePage> {
               ),
               SizedBox(height: 20),
               DropdownButtonFormField<String>(
+                isExpanded: true,
                 value: _selectedSubCategory,
                 onChanged: (newValue) {
                   setState(() {
@@ -334,21 +384,25 @@ class _AddServicePageState extends State<AddServicePage> {
                 validator: (value) => value == null ? 'Por favor selecciona una subcategoría' : null,
               ),
               SizedBox(height: 20),
-              DropdownButtonFormField<String>(
-                value: _selectedDistrict,
-                onChanged: (newValue) {
-                  setState(() {
-                    _selectedDistrict = newValue;
-                  });
-                },
-                items: _districts.map((district) {
-                  return DropdownMenuItem(
-                    child: Text(district),
-                    value: district,
-                  );
-                }).toList(),
-                decoration: _buildInputDecoration('Distrito'),
-                validator: (value) => value == null ? 'Por favor selecciona un distrito' : null,
+              GestureDetector(
+                onTap: () => _selectDistricts(context),
+                child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        _selectedDistricts.isEmpty ? 'Seleccionar Distritos' : _selectedDistricts.join(', '),
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
+                      Icon(Icons.arrow_drop_down, color: Colors.grey),
+                    ],
+                  ),
+                ),
               ),
               SizedBox(height: 20),
               TextFormField(
