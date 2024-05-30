@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'ChatListPage.dart';
 import 'servicios_page.dart';
 import 'reservaciones_page.dart';
 import 'perfil_page.dart';
+import 'notifications_page.dart'; // Import the NotificationsPage
 
 class HomePageCliente extends StatefulWidget {
   final int initialIndex;
@@ -49,13 +51,19 @@ class _HomePageClienteState extends State<HomePageCliente> {
           IconButton(
             icon: Icon(Icons.chat, color: Colors.white),
             onPressed: () {
-              // Implementar lógica para abrir el chat
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ChatListPage()),
+              );
             },
           ),
           IconButton(
             icon: Icon(Icons.notifications, color: Colors.white),
             onPressed: () {
-              // Implementar lógica para abrir las notificaciones
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => NotificationsPage()), // Navigate to NotificationsPage
+              );
             },
           ),
         ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'ReservaServicioPage.dart';
 
 class ServiciosPage extends StatefulWidget {
   @override
@@ -6,7 +7,7 @@ class ServiciosPage extends StatefulWidget {
 }
 
 class _ServiciosPageState extends State<ServiciosPage> {
-  List<bool> _isFavorite = [false, false];
+  List<bool> _isFavorite = [false];
   double _minPrice = 0;
   double _maxPrice = 5000;
   RangeValues _priceRange = RangeValues(0, 5000);
@@ -19,6 +20,135 @@ class _ServiciosPageState extends State<ServiciosPage> {
   void _applyFilters() {
     // Aquí iría la lógica para aplicar los filtros
     Navigator.pop(context);
+  }
+
+  void _showServiceDetails(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return DraggableScrollableSheet(
+          expand: false,
+          builder: (context, scrollController) {
+            return SingleChildScrollView(
+              controller: scrollController,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(15),
+                      child: Image.asset(
+                        'assets/images/armarios.png',  // Imagen del servicio de armarios
+                        height: 180,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    Text('Carpintería > Muebles', style: TextStyle(color: Colors.grey)),
+                    SizedBox(height: 8),
+                    Row(
+                      children: List.generate(5, (starIndex) {
+                        return Icon(
+                          starIndex < 4 ? Icons.star : Icons.star_border,
+                          color: starIndex < 4 ? Colors.green : Colors.grey,
+                          size: 20,
+                        );
+                      }),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Armarios y vestidores a medida',
+                      style: TextStyle(fontFamily: 'Mont-Bold', fontSize: 16),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'S/ 150 por: 1:00 hr',
+                      style: TextStyle(color: Colors.green, fontFamily: 'Mont-Bold', fontSize: 16),
+                    ),
+                    SizedBox(height: 16),
+                    Text('Descripción', style: TextStyle(fontFamily: 'Mont-Bold', fontSize: 16)),
+                    SizedBox(height: 4),
+                    Text('aca se coloca la descripción de ........', style: TextStyle(fontFamily: 'Mont-Regular')),
+                    SizedBox(height: 16),
+                    Text('Distritos', style: TextStyle(fontFamily: 'Mont-Bold', fontSize: 16)),
+                    SizedBox(height: 4),
+                    Text('Distritos disponibles 1', style: TextStyle(fontFamily: 'Mont-Regular')),
+                    Text('Distritos disponibles 2', style: TextStyle(fontFamily: 'Mont-Regular')),
+                    SizedBox(height: 16),
+                    Text('Proveedor', style: TextStyle(fontFamily: 'Mont-Bold', fontSize: 16)),
+                    SizedBox(height: 8),
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundImage: AssetImage('assets/images/jonathan.jpg'),
+                          radius: 30,
+                        ),
+                        SizedBox(width: 16),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Mateo Romero', style: TextStyle(fontFamily: 'Mont-Bold', fontSize: 16)),
+                            Text('Este servicio se realiza de manera óptima ...', style: TextStyle(fontFamily: 'Mont-Regular')),
+                          ],
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    Text('Reseñas', style: TextStyle(fontFamily: 'Mont-Bold', fontSize: 16)),
+                    SizedBox(height: 8),
+                    ListTile(
+                      leading: CircleAvatar(
+                        backgroundImage: AssetImage('assets/images/jonathan.jpg'),
+                      ),
+                      title: Text('Mateo Mamani', style: TextStyle(fontFamily: 'Mont-Bold')),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: List.generate(5, (starIndex) {
+                              return Icon(
+                                starIndex < 4 ? Icons.star : Icons.star_border,
+                                color: starIndex < 4 ? Colors.green : Colors.grey,
+                                size: 16,
+                              );
+                            }),
+                          ),
+                          SizedBox(height: 4),
+                          Text('Febrero 15, 2024', style: TextStyle(fontFamily: 'Mont-Regular')),
+                          SizedBox(height: 4),
+                          Text('Fue un muy buen servicio, todo quedo muy lindo.', style: TextStyle(fontFamily: 'Mont-Regular')),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    Center(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // Lógica para reservar el servicio
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => ReservaServicioPage()),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF6286CB),
+                          padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                        ),
+                        child: Text('Reservar ahora', style: TextStyle(fontFamily: 'Mont-Bold', color: Colors.white)),
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -54,10 +184,12 @@ class _ServiciosPageState extends State<ServiciosPage> {
       ),
       body: ListView.builder(
         padding: EdgeInsets.all(16),
-        itemCount: 2,
+        itemCount: 1,  // Solo una tarjeta
         itemBuilder: (context, index) {
           return GestureDetector(
-            onTap: () {},
+            onTap: () {
+              _showServiceDetails(context);
+            },
             child: Card(
               margin: EdgeInsets.only(bottom: 16),
               shape: RoundedRectangleBorder(
@@ -71,9 +203,7 @@ class _ServiciosPageState extends State<ServiciosPage> {
                       ClipRRect(
                         borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
                         child: Image.asset(
-                          index == 0
-                              ? 'assets/images/armarios.png'
-                              : 'assets/images/pisos.jpg',
+                          'assets/images/armarios.png',  // Imagen del servicio de armarios
                           height: 180,
                           width: double.infinity,
                           fit: BoxFit.cover,
@@ -112,14 +242,12 @@ class _ServiciosPageState extends State<ServiciosPage> {
                         ),
                         SizedBox(height: 8),
                         Text(
-                          index == 0
-                              ? 'Armarios y vestidores a medida'
-                              : 'Instalación de Pisos de Parquet',
+                          'Armarios y vestidores a medida',
                           style: TextStyle(fontFamily: 'Mont-Bold', fontSize: 16),
                         ),
                         SizedBox(height: 4),
                         Text(
-                          index == 0 ? 'S/ 150' : 'S/ 500',
+                          'S/ 150',
                           style: TextStyle(color: Colors.green, fontFamily: 'Mont-Bold', fontSize: 16),
                         ),
                         SizedBox(height: 4),

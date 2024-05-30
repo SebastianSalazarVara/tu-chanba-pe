@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'edit_profile_page.dart';
 import '../login_page.dart';
 import 'change_password_page.dart';
 import 'favorite_providers_page.dart';
@@ -31,25 +31,33 @@ class _PerfilPageState extends State<PerfilPage> {
         child: Column(
           children: [
             SizedBox(height: 20),
-            Stack(
-              children: [
-                CircleAvatar(
-                  radius: 50,
-                  backgroundColor: Colors.grey[300],
-                  backgroundImage: widget.user['profileImage'] != null
-                      ? NetworkImage(widget.user['profileImage'])
-                      : AssetImage('assets/default_profile.png') as ImageProvider,
-                ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: CircleAvatar(
-                    radius: 15,
-                    backgroundColor: Color(0xFF0158C8),
-                    child: Icon(Icons.edit, color: Colors.white, size: 16),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => EditProfilePage(user: widget.user)),
+                );
+              },
+              child: Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundColor: Colors.grey[300],
+                    backgroundImage: widget.user['profileImage'] != null
+                        ? NetworkImage(widget.user['profileImage'])
+                        : AssetImage('assets/default_profile.png') as ImageProvider,
                   ),
-                ),
-              ],
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: CircleAvatar(
+                      radius: 15,
+                      backgroundColor: Color(0xFF0158C8),
+                      child: Icon(Icons.edit, color: Colors.white, size: 16),
+                    ),
+                  ),
+                ],
+              ),
             ),
             SizedBox(height: 10),
             Text(widget.user['name'], style: TextStyle(fontFamily: 'Mont-Bold', fontSize: 20)),

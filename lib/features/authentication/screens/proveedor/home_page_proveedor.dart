@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:tuchanbape/features/authentication/screens/proveedor/notifications_page.dart';
 import 'package:tuchanbape/features/authentication/screens/proveedor/pagos_page.dart';
 import 'package:tuchanbape/features/authentication/screens/proveedor/reservaciones_page.dart';
+import 'ChatListPage.dart';  // Importa ChatListPage en lugar de ChatPage
 import 'perfil_page.dart';  // Importa PerfilPage
 
 class HomePageProveedor extends StatefulWidget {
@@ -49,13 +51,19 @@ class _HomePageProveedorState extends State<HomePageProveedor> {
           IconButton(
             icon: Icon(Icons.chat, color: Colors.white),
             onPressed: () {
-              // Implementar lógica para abrir el chat
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ChatListPage()), // Redirige a ChatListPage
+              );
             },
           ),
           IconButton(
             icon: Icon(Icons.notifications, color: Colors.white),
             onPressed: () {
-              // Implementar lógica para abrir las notificaciones
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => NotificationsPage()),
+              );
             },
           ),
         ],

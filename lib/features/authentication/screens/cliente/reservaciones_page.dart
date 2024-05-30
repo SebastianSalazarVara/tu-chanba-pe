@@ -6,24 +6,18 @@ class ReservacionesPage extends StatefulWidget {
 }
 
 class _ReservacionesPageState extends State<ReservacionesPage> {
-  final List<Map<String, dynamic>> reservaciones = [
-    {
-      "estado": "Completado",
-      "precio": "S/ 110.00",
-      "direccion": "Calle 123 asd",
-      "fecha": "10 de octubre, 2024 a las 4:00 pm",
-      "proveedor": "André Talavera",
-      "id": "#01011"
-    },
-    {
-      "estado": "En Espera",
-      "precio": "S/ 500.00",
-      "direccion": "Calle 123 asd",
-      "fecha": "15 de octubre, 2024 a las 16:00 pm",
-      "proveedor": "Mateo Romero",
-      "id": "#01010"
-    }
-  ];
+  final Map<String, dynamic> reserva = {
+    "estado": "En Espera",
+    "precio": "S/ 500.00",
+    "precioAdelantado": "S/ 250.00",
+    "direccion": "Calle 123 asd",
+    "fecha": "15 de octubre, 2024",
+    "hora": "16:00 pm",
+    "proveedor": "Mateo Romero",
+    "correo": "Mateo@user.com",
+    "id": "#01010",
+    "descripcion": "Se quiere que diseñe y realice un armario con las medidas...",
+  };
 
   final List<String> estados = [
     "Completado",
@@ -40,6 +34,7 @@ class _ReservacionesPageState extends State<ReservacionesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title: Text('Reservaciones'),
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -59,10 +54,15 @@ class _ReservacionesPageState extends State<ReservacionesPage> {
       ),
       body: ListView(
         padding: EdgeInsets.all(8.0),
-        children: reservaciones
-            .where((reserva) => filtrosSeleccionados.isEmpty || filtrosSeleccionados.contains(reserva['estado']))
-            .map((reserva) => _buildReservacionCard(reserva))
-            .toList(),
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ReservaDetallesPage(reserva: reserva)),
+            ),
+            child: _buildReservacionCard(reserva),
+          ),
+        ],
       ),
     );
   }
@@ -101,12 +101,12 @@ class _ReservacionesPageState extends State<ReservacionesPage> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
-                              reserva['estado'],
+                              reserva['estado'] ?? 'Sin Estado',
                               style: TextStyle(color: Colors.white),
                             ),
                           ),
                           Text(
-                            reserva['id'],
+                            reserva['id'] ?? 'Sin ID',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Color(0xFF6286CB),
@@ -123,7 +123,7 @@ class _ReservacionesPageState extends State<ReservacionesPage> {
                         ),
                       ),
                       Text(
-                        reserva['precio'],
+                        reserva['precio'] ?? 'S/ 0.00',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -143,7 +143,7 @@ class _ReservacionesPageState extends State<ReservacionesPage> {
                 Text("Dirección:", style: TextStyle(fontWeight: FontWeight.bold)),
                 Expanded(
                   child: Text(
-                    reserva['direccion'],
+                    reserva['direccion'] ?? 'Sin Dirección',
                     textAlign: TextAlign.right,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -155,7 +155,7 @@ class _ReservacionesPageState extends State<ReservacionesPage> {
               children: [
                 Text("Día y Hora:", style: TextStyle(fontWeight: FontWeight.bold)),
                 Text(
-                  reserva['fecha'],
+                  "${reserva['fecha'] ?? 'Sin Fecha'} a las ${reserva['hora'] ?? 'Sin Hora'}",
                   textAlign: TextAlign.right,
                 ),
               ],
@@ -165,7 +165,7 @@ class _ReservacionesPageState extends State<ReservacionesPage> {
               children: [
                 Text("Proveedor:", style: TextStyle(fontWeight: FontWeight.bold)),
                 Text(
-                  reserva['proveedor'],
+                  reserva['proveedor'] ?? 'Sin Proveedor',
                   textAlign: TextAlign.right,
                 ),
               ],
@@ -243,6 +243,125 @@ class _ReservacionesPageState extends State<ReservacionesPage> {
           },
         );
       },
+    );
+  }
+}
+
+class ReservaDetallesPage extends StatelessWidget {
+  final Map<String, dynamic> reserva;
+
+  ReservaDetallesPage({required this.reserva});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(reserva['estado'] ?? 'Sin Estado'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: ListView(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("ID de Reserva", style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(reserva['id'] ?? 'Sin ID', style: TextStyle(fontWeight: FontWeight.bold)),
+              ],
+            ),
+            SizedBox(height: 16),
+            Text("Armarios y vestidores a medida", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+            SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Día:", style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text(reserva['fecha'] ?? 'Sin Fecha'),
+                    SizedBox(height: 8),
+                    Text("Hora:", style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text(reserva['hora'] ?? 'Sin Hora'),
+                  ],
+                ),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: Image.asset(
+                    'assets/images/armarios.png',
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 16),
+            Text("Cliente", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            Card(
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundImage: AssetImage('assets/images/cliente.png'), // Imagen del cliente
+                ),
+                title: Text(reserva['proveedor'] ?? 'Sin Proveedor'),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(reserva['correo'] ?? 'Sin Correo'),
+                    Text(reserva['direccion'] ?? 'Sin Dirección'),
+                  ],
+                ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.call),
+                      onPressed: () {
+                        // Acción para llamar al cliente
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.chat),
+                      onPressed: () {
+                        // Acción para chatear con el cliente
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 16),
+            Text("Descripción de la Reserva", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            Text(reserva['descripcion'] ?? 'Sin Descripción'),
+            SizedBox(height: 16),
+            Text("Detalles del Precio", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("Precio Total:", style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(reserva['precio'] ?? 'S/ 0.00'),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("Pago Adelantado:", style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(reserva['precioAdelantado'] ?? 'S/ 0.00'),
+              ],
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                // Acción para confirmar el pago
+              },
+              child: Text('Pago Confirmado'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF6286CB),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

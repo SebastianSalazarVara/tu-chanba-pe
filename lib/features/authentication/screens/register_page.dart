@@ -45,7 +45,7 @@ class _RegisterPageState extends State<RegisterPage> {
       join(await getDatabasesPath(), 'user_database.db'),
       onCreate: (db, version) {
         return db.execute(
-          "CREATE TA  BLE users(email TEXT PRIMARY KEY, nombres TEXT, apellidos TEXT, userType TEXT, contact TEXT, password TEXT, profilePhoto TEXT)",
+          "CREATE TABLE users(email TEXT PRIMARY KEY, nombres TEXT, apellidos TEXT, userType TEXT, contact TEXT, password TEXT, profilePhoto TEXT)",
         );
       },
       version: 1,
