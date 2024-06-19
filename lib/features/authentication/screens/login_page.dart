@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'administrador/admin_home_page.dart';
 import 'forgot_password_page.dart';
 import 'register_page.dart';
 import 'proveedor/home_page_proveedor.dart'; // Página de inicio para proveedores
@@ -64,6 +65,11 @@ class _LoginPageState extends State<LoginPage> {
         context,
         MaterialPageRoute(builder: (context) => HomePageCliente(user: userInfo)),
       );
+    } else if (userType == 'Administrador') {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => AdminHomePage()),
+      );
     }
   }
 
@@ -75,6 +81,12 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     if (_isEmailValid && _isPasswordValid) {
+      // Verificación de credenciales del administrador
+      if (_emailController.text == 'administrador' && _passwordController.text == 'administrador') {
+        _redirectToHome('Administrador', context, {});
+        return;
+      }
+
       final db = await _initializeDatabase();
       final List<Map<String, dynamic>> maps = await db.query(
         'users',

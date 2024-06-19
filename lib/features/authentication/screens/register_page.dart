@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import '../../../common_widgets/CustomButton.dart';
+import '../../../common_widgets/CustomCheckbox.dart';
+import '../../../common_widgets/CustomDropdown.dart';
+import '../../../common_widgets/CustomTextField.dart';
+import '../../../common_widgets/PasswordValidationField.dart';
+import '../../../common_widgets/RichTextLink.dart';
 import 'login_page.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -9,35 +15,31 @@ class RegisterPage extends StatefulWidget {
   _RegisterPageState createState() => _RegisterPageState();
 }
 
-// Controlador para el campo de contraseña
-TextEditingController _passwordController = TextEditingController();
-
 class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
-  bool _isPasswordVisible = false;
   bool _termsChecked = false;
-  bool _isLoginHover = false;
-  bool _isAccountHover = false;
   String? _selectedUserType;
   String? _email;
   String? _nombres;
   String? _apellidos;
   String? _contact;
-  bool _showUserTypeError = false;
 
-  // Variables para la validación de la contraseña
-  bool _isLengthValid = false;
-  bool _hasUpperCase = false;
-  bool _hasNumber = false;
-  bool _hasSpecialChar = false;
+  // Mueve el controlador dentro de la clase State
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _nombresController = TextEditingController();
+  final TextEditingController _apellidosController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _contactController = TextEditingController();
 
-  void _validatePassword(String value) {
-    setState(() {
-      _isLengthValid = value.length >= 8;
-      _hasUpperCase = value.contains(RegExp(r'[A-Z]'));
-      _hasNumber = value.contains(RegExp(r'[0-9]'));
-      _hasSpecialChar = value.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>_+/*-]'));
-    });
+  @override
+  void dispose() {
+    // Asegúrate de liberar los controladores cuando no sean necesarios
+    _passwordController.dispose();
+    _nombresController.dispose();
+    _apellidosController.dispose();
+    _emailController.dispose();
+    _contactController.dispose();
+    super.dispose();
   }
 
   Future<Database> _initializeDatabase() async {
@@ -97,11 +99,7 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   void _register() async {
-    setState(() {
-      _showUserTypeError = _selectedUserType == null;
-    });
-
-    if (_formKey.currentState!.validate() && _selectedUserType != null && _termsChecked) {
+    if (_formKey.currentState!.validate() && _termsChecked) {
       _formKey.currentState!.save();
       try {
         await _registerUser(
@@ -117,14 +115,14 @@ class _RegisterPageState extends State<RegisterPage> {
       } catch (e) {
         _showSnackBar(e.toString());
       }
-    } else {
-      if (_selectedUserType == null) {
-        _showSnackBar('Por favor elige un tipo de usuario');
-      }
-      if (!_termsChecked) {
-        _showSnackBar('Por favor acepta los términos y condiciones');
-      }
     }
+  }
+
+  String? _validateUserType(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Por favor elige un tipo de usuario';
+    }
+    return null;
   }
 
   @override
@@ -151,68 +149,24 @@ class _RegisterPageState extends State<RegisterPage> {
                 SizedBox(height: 20),
                 Text('Crea tu cuenta para una mejor experiencia', textAlign: TextAlign.center),
                 SizedBox(height: 20),
-                FormField<String>(
-                  builder: (FormFieldState<String> state) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        InputDecorator(
-                          decoration: InputDecoration(
-                            labelText: 'Tipo de Usuario',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(color: Color(0xFFF5F5F5)),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(color: Color(0xFF6286CB)),
-                            ),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                          ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              value: _selectedUserType,
-                              isDense: true,
-                              onChanged: (String? newValue) {
-                                setState(() {
-                                  _selectedUserType = newValue;
-                                  state.didChange(newValue);
-                                  _showUserTypeError = false;
-                                });
-                              },
-                              items: [
-                                DropdownMenuItem(child: Text('Proveedor'), value: 'Proveedor'),
-                                DropdownMenuItem(child: Text('Cliente'), value: 'Cliente'),
-                              ],
-                            ),
-                          ),
-                        ),
-                        if (_showUserTypeError)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: Text(
-                              'Por favor elige un tipo de usuario',
-                              style: TextStyle(color: Colors.red.shade700, fontSize: 12.0),
-                            ),
-                          ),
-                      ],
-                    );
+                CustomDropdown(
+                  labelText: 'Tipo de Usuario',
+                  value: _selectedUserType,
+                  items: [
+                    DropdownMenuItem(child: Text('Proveedor'), value: 'Proveedor'),
+                    DropdownMenuItem(child: Text('Cliente'), value: 'Cliente'),
+                  ],
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _selectedUserType = newValue;
+                    });
                   },
+                  validator: _validateUserType,
                 ),
                 SizedBox(height: 20),
-                TextFormField(
-                  decoration: InputDecoration(
-                    labelText: 'Nombres',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Color(0xFFF5F5F5)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Color(0xFF6286CB)),
-                    ),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                  ),
+                CustomTextField(
+                  labelText: 'Nombres',
+                  controller: _nombresController,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Por favor ingresa tu nombre';
@@ -221,24 +175,11 @@ class _RegisterPageState extends State<RegisterPage> {
                     }
                     return null;
                   },
-                  onSaved: (value) {
-                    _nombres = value;
-                  },
                 ),
                 SizedBox(height: 10),
-                TextFormField(
-                  decoration: InputDecoration(
-                    labelText: 'Apellidos',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Color(0xFFF5F5F5)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Color(0xFF6286CB)),
-                    ),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                  ),
+                CustomTextField(
+                  labelText: 'Apellidos',
+                  controller: _apellidosController,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Por favor ingresa tus apellidos';
@@ -247,24 +188,11 @@ class _RegisterPageState extends State<RegisterPage> {
                     }
                     return null;
                   },
-                  onSaved: (value) {
-                    _apellidos = value;
-                  },
                 ),
                 SizedBox(height: 10),
-                TextFormField(
-                  decoration: InputDecoration(
-                    labelText: 'Dirección de correo',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Color(0xFFF5F5F5)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Color(0xFF6286CB)),
-                    ),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                  ),
+                CustomTextField(
+                  labelText: 'Dirección de correo',
+                  controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || !EmailValidator.validate(value)) {
@@ -272,24 +200,11 @@ class _RegisterPageState extends State<RegisterPage> {
                     }
                     return null;
                   },
-                  onSaved: (value) {
-                    _email = value;
-                  },
                 ),
                 SizedBox(height: 10),
-                TextFormField(
-                  decoration: InputDecoration(
-                    labelText: 'Número de Contacto',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Color(0xFFF5F5F5)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Color(0xFF6286CB)),
-                    ),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                  ),
+                CustomTextField(
+                  labelText: 'Número de Contacto',
+                  controller: _contactController,
                   keyboardType: TextInputType.phone,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -299,205 +214,105 @@ class _RegisterPageState extends State<RegisterPage> {
                     }
                     return null;
                   },
-                  onSaved: (value) {
-                    _contact = value;
-                  },
                 ),
                 SizedBox(height: 10),
-                TextFormField(
-                  controller: _passwordController,
-                  decoration: InputDecoration(
-                    labelText: 'Contraseña',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Color(0xFFF5F5F5)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Color(0xFF6286CB)),
-                    ),
-                    contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-                    suffixIcon: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _isPasswordVisible = !_isPasswordVisible;
-                        });
-                      },
-                      child: Container(
-                        padding: EdgeInsets.all(1),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Color(0xFFF5F5F5)),
+                FormField<String>(
+                  builder: (FormFieldState<String> state) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        PasswordValidationField(
+                          controller: _passwordController,
                         ),
-                        child: Icon(
-                          _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ),
-                  ),
-                  obscureText: !_isPasswordVisible,
-                  style: TextStyle(fontFamily: 'Mont'),
-                  onChanged: _validatePassword,
-                ),
-                SizedBox(height: 5),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildPasswordCriteriaRow(
-                      'Mínimo 8 caracteres',
-                      _isLengthValid,
-                    ),
-                    _buildPasswordCriteriaRow(
-                      'Uso de mayúsculas',
-                      _hasUpperCase,
-                    ),
-                    _buildPasswordCriteriaRow(
-                      'Uso de números',
-                      _hasNumber,
-                    ),
-                    _buildPasswordCriteriaRow(
-                      'Uso de símbolos',
-                      _hasSpecialChar,
-                    ),
-                  ],
+                        if (state.hasError)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 5),
+                            child: Text(
+                              state.errorText!,
+                              style: TextStyle(color: Colors.red, fontSize: 12),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                  validator: (value) {
+                    if (_passwordController.text.isEmpty) {
+                      return 'Por favor ingresa una contraseña';
+                    }
+                    return null;
+                  },
                 ),
                 SizedBox(height: 20),
-                CheckboxListTile(
-                  controlAffinity: ListTileControlAffinity.leading,
-                  title: RichText(
-                    text: TextSpan(
-                      text: 'Acepto los ',
-                      style: TextStyle(color: Colors.black),
-                      children: [
-                        TextSpan(
-                          text: 'Términos de servicio',
-                          style: TextStyle(color: Colors.blue),
+                FormField<bool>(
+                  builder: (FormFieldState<bool> state) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        CustomCheckbox(
+                          value: _termsChecked,
+                          onChanged: (newValue) {
+                            setState(() {
+                              _termsChecked = newValue!;
+                              state.didChange(newValue);
+                            });
+                          },
+                          title: RichText(
+                            text: TextSpan(
+                              text: 'Acepto los ',
+                              style: TextStyle(color: Colors.black),
+                              children: [
+                                TextSpan(
+                                  text: 'Términos de servicio',
+                                  style: TextStyle(color: Colors.blue),
+                                ),
+                                TextSpan(text: ' y la '),
+                                TextSpan(
+                                  text: 'Política de privacidad',
+                                  style: TextStyle(color: Colors.blue),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                        TextSpan(text: ' y la '),
-                        TextSpan(
-                          text: 'Política de privacidad',
-                          style: TextStyle(color: Colors.blue),
-                        ),
+                        if (state.hasError)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 5),
+                            child: Text(
+                              state.errorText!,
+                              style: TextStyle(color: Colors.red, fontSize: 12),
+                            ),
+                          ),
                       ],
-                    ),
-                  ),
-                  value: _termsChecked,
-                  onChanged: (newValue) {
-                    setState(() {
-                      _termsChecked = newValue!;
-                    });
+                    );
+                  },
+                  validator: (value) {
+                    if (!_termsChecked) {
+                      return 'Por favor acepta los términos y condiciones';
+                    }
+                    return null;
                   },
                 ),
-                GestureDetector(
-                  onTap: _register,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Color(0xFF3F60A0),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    alignment: Alignment.center,
-                    child: Text(
-                      'Registrarse',
-                      style: TextStyle(
-                        fontFamily: 'Mont',
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        fontSize: 21,
-                      ),
-                    ),
-                  ),
+                SizedBox(height: 20),
+                CustomButton(
+                  text: 'Registrarse',
+                  onPressed: _register,
                 ),
                 SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    MouseRegion(
-                      onEnter: (_) {
-                        setState(() {
-                          _isAccountHover = true;
-                        });
-                      },
-                      onExit: (_) {
-                        setState(() {
-                          _isAccountHover = false;
-                        });
-                      },
-                      child: GestureDetector(
-                        onTap: () {},
-                        child: Container(
-                          padding: EdgeInsets.symmetric(horizontal: 1, vertical: 8),
-                          color: Colors.transparent,
-                          child: Text(
-                            '¿Ya tienes cuenta? ',
-                            style: TextStyle(
-                              color: _isAccountHover ? Color(0xFFFF914D) : Colors.black,
-                              fontFamily: 'Mont',
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                    ),
-                    MouseRegion(
-                      onEnter: (_) {
-                        setState(() {
-                          _isLoginHover = true;
-                        });
-                      },
-                      onExit: (_) {
-                        setState(() {
-                          _isLoginHover = false;
-                        });
-                      },
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (context) => LoginPage()),
-                          );
-                        },
-                        child: Container(
-                          padding: EdgeInsets.symmetric(horizontal: 1, vertical: 8),
-                          color: Colors.transparent,
-                          child: Text(
-                            'Iniciar sesión',
-                            style: TextStyle(
-                              color: _isLoginHover ? Color(0xFFFF914D) : Colors.blue,
-                              fontFamily: 'Mont',
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                RichTextLink(
+                  normalText: '¿Ya tienes cuenta? ',
+                  linkText: 'Iniciar sesión',
+                  onLinkTap: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => LoginPage()),
+                    );
+                  },
                 ),
               ],
             ),
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildPasswordCriteriaRow(String text, bool isValid) {
-    return Row(
-      children: [
-        Icon(
-          isValid ? Icons.check_circle_outline : Icons.highlight_off,
-          color: isValid ? Colors.green : Colors.red,
-          size: 18,
-        ),
-        SizedBox(width: 5),
-        Text(
-          text,
-          style: TextStyle(
-            color: isValid ? Colors.green : Colors.red,
-          ),
-        ),
-      ],
     );
   }
 }
