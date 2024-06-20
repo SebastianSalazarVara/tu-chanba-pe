@@ -9,6 +9,11 @@ import '../../../common_widgets/CustomTextField.dart';
 import '../../../common_widgets/PasswordValidationField.dart';
 import '../../../common_widgets/RichTextLink.dart';
 import 'login_page.dart';
+import 'dart:io';
+
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'url.dart';
 
 class RegisterPage extends StatefulWidget {
   @override
@@ -57,15 +62,55 @@ class _RegisterPageState extends State<RegisterPage> {
   Future<void> _registerUser(String email, String nombres, String apellidos, String userType, String contact, String password) async {
     final db = await _initializeDatabase();
 
-    try {
-      await db.insert(
-        'users',
-        {'email': email, 'nombres': nombres, 'apellidos': apellidos, 'userType': userType, 'contact': contact, 'password': password, 'profilePhoto': ''},
-        conflictAlgorithm: ConflictAlgorithm.fail,
+    // try {
+    //   await db.insert(
+    //     'users',
+    //     {'email': email, 'nombres': nombres, 'apellidos': apellidos, 'userType': userType, 'contact': contact, 'password': password, 'profilePhoto': ''},
+    //     conflictAlgorithm: ConflictAlgorithm.fail,
+    //   );
+    // } catch (e) {
+    //   throw Exception('El correo ya está registrado.');
+    // }
+    var url1= ruta+'/usuario';
+    print("email: "+email);
+    print("nombres: "+nombres);
+    print("apellidos: "+apellidos);
+    print("userType: "+userType);
+    print("contact: "+contact);
+    print("password: "+password);
+    final uri=Uri.parse(url1);
+    //final respose=await http.get(uri);
+    //stdout.writeln(respose.body);
+    final client = http.Client();
+    try{
+      final response = await client.post(
+        uri,
+        body: jsonEncode({
+          'nombre': nombres,
+          'apellido': apellidos,
+          'correo': email,
+          'contrasena': password,
+          'telefono': contact,
+          'direccion': '',
+          'tipo': userType,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       );
-    } catch (e) {
-      throw Exception('El correo ya está registrado.');
+      if (response.statusCode == 200) {
+        print('Datos insertados correctamente: ${response.statusCode}');
+      } else {
+        print('Error al insertar datos: ${response.statusCode}');
+      }
+      stdout.writeln(response.body+ response.statusCode.toString());
+    }catch(e){
+      throw Exception('El correo ya está registrado.'+e.toString());
+    }finally{
+      client.close();
     }
+
+
   }
 
   void _showDialog(String title, String content) {
