@@ -101,6 +101,13 @@ class _RegisterPageState extends State<RegisterPage> {
   void _register() async {
     if (_formKey.currentState!.validate() && _termsChecked) {
       _formKey.currentState!.save();
+
+      // Asigna los valores de los controladores a las variables de instancia
+      _nombres = _nombresController.text;
+      _apellidos = _apellidosController.text;
+      _email = _emailController.text;
+      _contact = _contactController.text;
+
       try {
         await _registerUser(
           _email!,
@@ -316,3 +323,4 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 }
+
