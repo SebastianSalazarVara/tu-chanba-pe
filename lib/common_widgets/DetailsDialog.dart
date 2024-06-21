@@ -3,17 +3,20 @@ import 'package:flutter/material.dart';
 import '../../../../common_widgets/CustomButton.dart';
 import '../../../../common_widgets/CustomTextField.dart';
 import '../../../../common_widgets/CustomDropdown.dart';
+import '../../../../common_widgets/CustomMessageDialog.dart';
 
 class DetailsDialog extends StatefulWidget {
   final String name;
   final String entity;
   final bool isNew;
+  final VoidCallback onSave;  // Añadido
 
   const DetailsDialog({
     Key? key,
     required this.name,
     required this.entity,
     this.isNew = false,
+    required this.onSave,  // Añadido
   }) : super(key: key);
 
   @override
@@ -85,7 +88,17 @@ class _DetailsDialogState extends State<DetailsDialog> {
               CustomButton(
                 text: 'Guardar',
                 onPressed: () {
-                  // Implementa la lógica de guardar los cambios
+                  showDialog(
+                    context: context,
+                    builder: (context) => CustomMessageDialog(
+                      message: '¿Estás seguro/a de que deseas guardar los cambios?',
+                      onConfirm: () {
+                        widget.onSave();  // Añadido
+                        Navigator.of(context).pop(); // Cierra el CustomMessageDialog
+                        Navigator.of(context).pop(); // Cierra el DetailsDialog
+                      },
+                    ),
+                  );
                 },
               ),
             ],

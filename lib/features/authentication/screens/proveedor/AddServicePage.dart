@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import '../../../../common_widgets/CustomButton.dart';
+import '../../../../common_widgets/CustomMessageDialog.dart';
+import '../../../../common_widgets/CustomTextField.dart';
 
 class AddServicePage extends StatefulWidget {
   @override
@@ -125,20 +128,14 @@ class _AddServicePageState extends State<AddServicePage> {
             }).toList(),
           ),
           actions: [
-            ElevatedButton(
+            CustomButton(
+              text: 'Seleccionar Horas',
               onPressed: () {
                 Navigator.of(context).pop();
                 if (_selectedDays.isNotEmpty) {
                   _showTimePicker(context);
                 }
               },
-              style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(Color(0xFF3F60A0)),
-              ),
-              child: Text(
-                'Seleccionar Horas',
-                style: TextStyle(color: Colors.white),
-              ),
             ),
           ],
         );
@@ -214,14 +211,14 @@ class _AddServicePageState extends State<AddServicePage> {
             ),
           ),
           actions: [
-            TextButton(
+            CustomButton(
+              text: 'Aceptar',
               onPressed: () {
                 setState(() {
                   _selectedDistricts = selected;
                 });
                 Navigator.of(context).pop();
               },
-              child: Text('Aceptar'),
             ),
           ],
         );
@@ -229,20 +226,15 @@ class _AddServicePageState extends State<AddServicePage> {
     );
   }
 
-  InputDecoration _buildInputDecoration(String labelText) {
-    return InputDecoration(
-      labelText: labelText,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: Color(0xFFF5F5F5)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: BorderSide(color: Color(0xFF6286CB)),
-      ),
-      contentPadding: EdgeInsets.symmetric(horizontal: 16),
-      filled: true,
-      fillColor: Color(0xFFF5F5F5),
+  void _showCustomMessageDialog(BuildContext context, String message, VoidCallback onConfirm) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CustomMessageDialog(
+          message: message,
+          onConfirm: onConfirm,
+        );
+      },
     );
   }
 
@@ -323,216 +315,175 @@ class _AddServicePageState extends State<AddServicePage> {
                 style: TextStyle(fontSize: 12, color: Colors.grey),
               ),
               SizedBox(height: 20),
-              TextFormField(
+              CustomTextField(
                 controller: _serviceNameController,
-                decoration: _buildInputDecoration('Nombre del servicio'),
+                labelText: 'Nombre del Servicio',
                 validator: (value) {
-                  if (value!.isEmpty) {
+                  if (value == null || value.isEmpty) {
                     return 'Por favor ingresa el nombre del servicio';
                   }
                   return null;
                 },
               ),
               SizedBox(height: 20),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: _buildInputDecoration('Descripción'),
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Por favor ingresa una descripción';
-                  }
-                  return null;
-                },
-                maxLines: 5,
-              ),
-              SizedBox(height: 20),
-              DropdownButtonFormField<String>(
-                value: _selectedCategory,
-                onChanged: (newValue) {
-                  setState(() {
-                    _selectedCategory = newValue;
-                    _selectedSubCategory = null; // Reset subcategory when category changes
-                  });
-                },
-                items: _categories.keys.map((category) {
-                  return DropdownMenuItem(
-                    child: Text(category),
-                    value: category,
-                  );
-                }).toList(),
-                decoration: _buildInputDecoration('Categoría'),
-                validator: (value) => value == null ? 'Por favor selecciona una categoría' : null,
-              ),
-              SizedBox(height: 20),
-              DropdownButtonFormField<String>(
-                isExpanded: true,
-                value: _selectedSubCategory,
-                onChanged: (newValue) {
-                  setState(() {
-                    _selectedSubCategory = newValue;
-                  });
-                },
-                items: _selectedCategory == null
-                    ? []
-                    : _categories[_selectedCategory]!.map((subcategory) {
-                  return DropdownMenuItem(
-                    child: Text(subcategory),
-                    value: subcategory,
-                  );
-                }).toList(),
-                decoration: _buildInputDecoration('Subcategoría'),
-                validator: (value) => value == null ? 'Por favor selecciona una subcategoría' : null,
-              ),
-              SizedBox(height: 20),
-              GestureDetector(
-                onTap: () => _selectDistricts(context),
-                child: Container(
-                  padding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        _selectedDistricts.isEmpty ? 'Seleccionar Distritos' : _selectedDistricts.join(', '),
-                        style: TextStyle(color: Colors.grey[600]),
-                      ),
-                      Icon(Icons.arrow_drop_down, color: Colors.grey),
-                    ],
+              InputDecorator(
+                decoration: InputDecoration(
+                  labelText: 'Categoría',
+                  border: OutlineInputBorder(),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: _selectedCategory,
+                    isDense: true,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedCategory = newValue;
+                        _selectedSubCategory = null;
+                      });
+                    },
+                    items: _categories.keys.map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
                   ),
                 ),
               ),
               SizedBox(height: 20),
-              TextFormField(
-                controller: _priceController,
-                decoration: _buildInputDecoration('Precio'),
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
+              if (_selectedCategory != null)
+                InputDecorator(
+                  decoration: InputDecoration(
+                    labelText: 'Subcategoría',
+                    border: OutlineInputBorder(),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: _selectedSubCategory,
+                      isDense: true,
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _selectedSubCategory = newValue;
+                        });
+                      },
+                      items: _categories[_selectedCategory]!.map((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+              SizedBox(height: 20),
+              CustomTextField(
+                controller: _descriptionController,
+                labelText: 'Descripción del Servicio',
+                maxLines: 5,
                 validator: (value) {
-                  if (value!.isEmpty) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor ingresa una descripción';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 20),
+              CustomTextField(
+                controller: _priceController,
+                labelText: 'Precio',
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
                     return 'Por favor ingresa el precio';
                   }
                   return null;
                 },
               ),
               SizedBox(height: 20),
-              DropdownButtonFormField<String>(
-                value: _chargeMode,
-                onChanged: (newValue) {
+              InputDecorator(
+                decoration: InputDecoration(
+                  labelText: 'Modo de Cobro',
+                  border: OutlineInputBorder(),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: _chargeMode,
+                    isDense: true,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _chargeMode = newValue;
+                      });
+                    },
+                    items: ['Por Hora', 'Por Día', 'Por Trabajo'].map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+              SwitchListTile(
+                title: Text('Servicio Prepagado'),
+                value: _isPrepaid,
+                onChanged: (value) {
                   setState(() {
-                    _chargeMode = newValue;
+                    _isPrepaid = value;
                   });
                 },
-                items: ['Por hora', 'Por metro cuadrado'].map((mode) {
-                  return DropdownMenuItem(
-                    child: Text(mode),
-                    value: mode,
-                  );
-                }).toList(),
-                decoration: _buildInputDecoration('Modalidad de Cobro'),
-                validator: (value) => value == null ? 'Por favor selecciona una modalidad de cobro' : null,
-              ),
-              SizedBox(height: 20),
-              ListTile(
-                title: Text('Estado'),
-                trailing: Switch(
-                  value: _isActive,
-                  onChanged: (value) {
-                    setState(() {
-                      _isActive = value;
-                    });
-                  },
-                ),
-              ),
-              SizedBox(height: 20),
-              ListTile(
-                title: Text('Pago Anticipado'),
-                trailing: Switch(
-                  value: _isPrepaid,
-                  onChanged: (value) {
-                    setState(() {
-                      _isPrepaid = value;
-                      if (!_isPrepaid) {
-                        _prepaidPercentageController.clear();
-                      }
-                    });
-                  },
-                ),
               ),
               if (_isPrepaid)
-                TextFormField(
+                CustomTextField(
                   controller: _prepaidPercentageController,
-                  decoration: _buildInputDecoration('Porcentaje de Pago Anticipado'),
-                  keyboardType: TextInputType.numberWithOptions(decimal: true),
+                  labelText: 'Porcentaje de prepago',
+                  keyboardType: TextInputType.number,
                   validator: (value) {
-                    if (_isPrepaid && value!.isEmpty) {
-                      return 'Por favor ingresa el porcentaje de pago anticipado';
+                    if (_isPrepaid && (value == null || value.isEmpty)) {
+                      return 'Por favor ingresa el porcentaje de prepago';
                     }
                     return null;
                   },
                 ),
               SizedBox(height: 20),
-              GestureDetector(
-                onTap: _selectTimeSlot,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Color(0xFF3F60A0),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  alignment: Alignment.center,
-                  child: Text(
-                    'Seleccionar Franjas Horarias',
-                    style: TextStyle(
-                      fontFamily: 'Mont',
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      fontSize: 21,
-                    ),
-                  ),
-                ),
+              CustomButton(
+                text: 'Seleccionar Franjas Horarias',
+                onPressed: () {
+                  _selectTimeSlot();
+                },
               ),
               SizedBox(height: 20),
-              ..._selectedDays.map((day) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      day,
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    ...?_selectedTimes[day]?.map((time) {
-                      return Text('${time.format(context)}');
-                    }).toList(),
-                    Divider(),
-                  ],
-                );
-              }).toList(),
+              CustomButton(
+                text: 'Seleccionar Distritos',
+                onPressed: () {
+                  _selectDistricts(context);
+                },
+              ),
               SizedBox(height: 20),
-              GestureDetector(
-                onTap: () {
+              SwitchListTile(
+                title: Text('Activo'),
+                value: _isActive,
+                onChanged: (value) {
+                  setState(() {
+                    _isActive = value;
+                  });
+                },
+              ),
+              SizedBox(height: 20),
+              CustomButton(
+                text: 'Guardar Servicio',
+                onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    // Procesar la información del formulario
+                    _showCustomMessageDialog(
+                      context,
+                      '¿Estás seguro de que quieres guardar el servicio?',
+                          () {
+                        // Aquí puedes manejar la lógica de guardar el servicio
+                        Navigator.of(context).pop(); // Cerrar el diálogo
+                      },
+                    );
                   }
                 },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Color(0xFF3F60A0),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  alignment: Alignment.center,
-                  child: Text(
-                    'Guardar Servicio',
-                    style: TextStyle(
-                      fontFamily: 'Mont',
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      fontSize: 21,
-                    ),
-                  ),
-                ),
               ),
             ],
           ),
@@ -541,3 +492,4 @@ class _AddServicePageState extends State<AddServicePage> {
     );
   }
 }
+

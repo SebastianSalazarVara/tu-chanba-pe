@@ -15,7 +15,7 @@ class CustomDropdown extends StatefulWidget {
     this.value,
     required this.items,
     required this.onChanged,
-    this.validator,
+    this.validator, required Text hint,
   }) : super(key: key);
 
   @override

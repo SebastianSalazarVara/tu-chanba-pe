@@ -2,11 +2,17 @@ import 'package:flutter/material.dart';
 
 import '../../../../common_widgets/DetailsDialog.dart';
 import '../../../../common_widgets/TopBar.dart';
+import '../../../../common_widgets/CategoryListItem.dart';
 
 class PaymentMethodPage extends StatelessWidget {
   final String paymentMethod;
 
   const PaymentMethodPage({Key? key, required this.paymentMethod}) : super(key: key);
+
+  void _savePaymentMethod() {
+    // Implementa la lógica de guardar el método de cobro en la base de datos
+    // Por ejemplo: savePaymentMethodToDatabase();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,47 +23,34 @@ class PaymentMethodPage extends StatelessWidget {
         onAddPressed: () {
           showDialog(
             context: context,
-            builder: (context) => DetailsDialog(name: '', entity: 'Método de Cobro', isNew: true),
+            builder: (context) => DetailsDialog(
+              name: '',
+              entity: 'Método de Cobro',
+              isNew: true,
+              onSave: _savePaymentMethod,  // Añadido
+            ),
           );
         },
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          GestureDetector(
+          CategoryListItem(
+            name: 'Por metro cuadrado',
+            imagePath: null,
             onTap: () {
               showDialog(
                 context: context,
-                builder: (context) => DetailsDialog(name: 'Por metro cuadrado', entity: 'Método de Cobro'),
+                builder: (context) => DetailsDialog(
+                  name: 'Por metro cuadrado',
+                  entity: 'Método de Cobro',
+                  onSave: _savePaymentMethod,  // Añadido
+                ),
               );
             },
-            child: Container(
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Por metro cuadrado',
-                      style: TextStyle(
-                        fontFamily: 'Mont-Bold',
-                        fontSize: 18,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.more_vert, color: Colors.black),
-                    onPressed: () {
-                      // No se hace nada al presionar los tres puntos en métodos de cobro
-                    },
-                  ),
-                ],
-              ),
-            ),
+            onMorePressed: () {
+              // No se hace nada al presionar los tres puntos en métodos de cobro
+            },
           ),
           // Añade más métodos de cobro según sea necesario
         ],

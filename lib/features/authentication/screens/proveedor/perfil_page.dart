@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:tuchanbape/features/authentication/screens/login_page.dart';
+import '../../../../common_widgets/AvailabilityOption.dart';
+import '../../../../common_widgets/LogoutConfirmationDialog.dart';
+import '../../../../common_widgets/MenuItem.dart';
+import '../../../../common_widgets/TopBar.dart';
 import 'edit_profile_page.dart';  // Importa EditProfilePage
-
 import 'change_password_page.dart';
 import 'billing_info_page.dart';  // Página de información de cobro
 import 'services_page.dart';      // Página de servicios
@@ -20,15 +23,13 @@ class _PerfilPageState extends State<PerfilPage> {
   bool _isOptionSelected3 = false;
   bool _isOptionSelected4 = false;
   bool _isLoggingOut = false;
-  bool _isAvailable = true;
 
   @override
   Widget build(BuildContext context) {
-    if (MediaQuery.of(context).size.height < 600) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _showSmallScreenErrorDialog();
-      });
-    }
+    // Extract user details with default values to avoid nulls
+    final String profileImage = widget.user['profileImage'] ?? 'assets/default_profile.png';
+    final String name = widget.user['name'] ?? 'Nombre no disponible';
+    final String email = widget.user['email'] ?? 'Email no disponible';
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -48,9 +49,9 @@ class _PerfilPageState extends State<PerfilPage> {
                   CircleAvatar(
                     radius: 50,
                     backgroundColor: Colors.grey[300],
-                    backgroundImage: widget.user['profileImage'] != null
-                        ? NetworkImage(widget.user['profileImage'])
-                        : AssetImage('assets/default_profile.png') as ImageProvider,
+                    backgroundImage: profileImage.startsWith('http')
+                        ? NetworkImage(profileImage)
+                        : AssetImage(profileImage) as ImageProvider,
                   ),
                   Positioned(
                     bottom: 0,
@@ -65,97 +66,58 @@ class _PerfilPageState extends State<PerfilPage> {
               ),
             ),
             SizedBox(height: 10),
-            Text(widget.user['name'], style: TextStyle(fontFamily: 'Mont-Bold', fontSize: 20)),
-            Text(widget.user['email'], style: TextStyle(fontFamily: 'Mont-Bold', fontSize: 16, color: Colors.grey)),
+            Text(name, style: TextStyle(fontFamily: 'Mont-Bold', fontSize: 20)),
+            Text(email, style: TextStyle(fontFamily: 'Mont-Bold', fontSize: 16, color: Colors.grey)),
             SizedBox(height: 30),
-            _buildAvailabilityOption(),
-            _buildProfileOption(Icons.build, 'Servicios', _isOptionSelected1, () {
-              setState(() {
-                _isOptionSelected1 = !_isOptionSelected1;
-              });
-              _resetSelectionAfterDelay();
-              _navigateToServicesPage();
-            }),
-            _buildProfileOption(Icons.lock, 'Cambiar contraseña', _isOptionSelected2, () {
-              setState(() {
-                _isOptionSelected2 = !_isOptionSelected2;
-              });
-              _resetSelectionAfterDelay();
-              _navigateToChangePasswordPage();
-            }),
-            _buildProfileOption(Icons.credit_card, 'Información de Cobro', _isOptionSelected3, () {
-              setState(() {
-                _isOptionSelected3 = !_isOptionSelected3;
-              });
-              _resetSelectionAfterDelay();
-              _navigateToBillingInfoPage();
-            }),
-            _buildProfileOption(Icons.logout, 'Cerrar Sesión', _isOptionSelected4, () {
-              setState(() {
-                _isOptionSelected4 = true;
-                _isLoggingOut = true;
-              });
-              _resetSelectionAfterDelay();
-              _showLogoutConfirmationDialog();
-            }, _isLoggingOut),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAvailabilityOption() {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _isAvailable ? 'Estado disponible' : 'Estado no disponible',
-                  style: TextStyle(fontFamily: 'Mont-Bold', fontSize: 16),
-                ),
-                Text(
-                  _isAvailable ? 'Estás en línea' : 'No estás en línea',
-                  style: TextStyle(fontFamily: 'Mont-Regular', fontSize: 14, color: Colors.grey),
-                ),
-              ],
+            AvailabilityOption(
+              availableText: 'Estado disponible',
+              unavailableText: 'Estado no disponible',
             ),
-          ),
-          Switch(
-            value: _isAvailable,
-            onChanged: (value) {
-              setState(() {
-                _isAvailable = value;
-              });
-            },
-            activeColor: Colors.green,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProfileOption(IconData icon, String title, bool isSelected, VoidCallback onTap, [bool isLoggingOut = false]) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        color: isLoggingOut ? Colors.grey[400] : (isSelected ? Colors.grey[300] : null),
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 20,
-              backgroundColor: Color(0xFFDFDFDF),
-              child: Icon(icon, color: Color(0xFF888888)),
+            MenuItem(
+              icon: Icons.build,
+              title: 'Servicios',
+              onTap: () {
+                setState(() {
+                  _isOptionSelected1 = !_isOptionSelected1;
+                });
+                _resetSelectionAfterDelay();
+                _navigateToServicesPage();
+              },
             ),
-            SizedBox(width: 16),
-            Expanded(
-              child: Text(title, style: TextStyle(fontFamily: 'Mont-Bold', fontSize: 16)),
+            MenuItem(
+              icon: Icons.lock,
+              title: 'Cambiar contraseña',
+              onTap: () {
+                setState(() {
+                  _isOptionSelected2 = !_isOptionSelected2;
+                });
+                _resetSelectionAfterDelay();
+                _navigateToChangePasswordPage();
+              },
             ),
-            Icon(Icons.chevron_right, color: Color(0xFF888888)),
+            MenuItem(
+              icon: Icons.credit_card,
+              title: 'Información de Cobro',
+              onTap: () {
+                setState(() {
+                  _isOptionSelected3 = !_isOptionSelected3;
+                });
+                _resetSelectionAfterDelay();
+                _navigateToBillingInfoPage();
+              },
+            ),
+            MenuItem(
+              icon: Icons.logout,
+              title: 'Cerrar Sesión',
+              onTap: () {
+                setState(() {
+                  _isOptionSelected4 = true;
+                  _isLoggingOut = true;
+                });
+                _resetSelectionAfterDelay();
+                _showLogoutConfirmationDialog();
+              },
+            ),
           ],
         ),
       ),
@@ -178,42 +140,7 @@ class _PerfilPageState extends State<PerfilPage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              '¿Estás seguro/a de que deseas cerrar sesión?',
-              style: TextStyle(fontFamily: 'Mont-Bold', fontSize: 16),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          content: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(); // Cerrar el diálogo
-                  setState(() {
-                    _isLoggingOut = false;
-                  });
-                },
-                child: Text('Cancelar', style: TextStyle(color: Colors.black)),
-                style: TextButton.styleFrom(
-                  side: BorderSide(color: Color(0xFF3F60A0)),
-                ),
-              ),
-              SizedBox(width: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop(); // Cerrar el diálogo
-                  _logout(); // Ejecutar la función de cierre de sesión
-                },
-                child: Text('Confirmar', style: TextStyle(color: Colors.white)),
-                style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF3F60A0)),
-              ),
-            ],
-          ),
-          backgroundColor: Colors.white,
-        );
+        return LogoutConfirmationDialog(onConfirm: _logout);
       },
     ).then((_) {
       setState(() {
@@ -224,39 +151,6 @@ class _PerfilPageState extends State<PerfilPage> {
 
   void _logout() {
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
-  }
-
-  void _showSmallScreenErrorDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              'Pantalla demasiado pequeña',
-              style: TextStyle(fontFamily: 'Mont-Bold', fontSize: 16),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          content: Text(
-            'Esta aplicación requiere una pantalla más grande para funcionar correctamente.',
-            style: TextStyle(fontFamily: 'Mont-Regular', fontSize: 14),
-            textAlign: TextAlign.center,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Cerrar el diálogo
-              },
-              child: Text('Aceptar', style: TextStyle(color: Colors.black)),
-              style: TextButton.styleFrom(
-                side: BorderSide(color: Color(0xFF3F60A0)),
-              ),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   void _navigateToServicesPage() {
@@ -280,3 +174,4 @@ class _PerfilPageState extends State<PerfilPage> {
     );
   }
 }
+

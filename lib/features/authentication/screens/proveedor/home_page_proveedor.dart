@@ -47,6 +47,7 @@ class _HomePageProveedorState extends State<HomePageProveedor> {
           _selectedIndex == 0 ? 'Pagos' : _selectedIndex == 1 ? 'Reservaciones' : 'Perfil',
           style: TextStyle(color: Colors.white, fontFamily: 'Mont-Bold', fontSize: 24),
         ),
+        automaticallyImplyLeading: false, // Aquí se elimina la flecha de retroceso
         actions: [
           IconButton(
             icon: Icon(Icons.chat, color: Colors.white),

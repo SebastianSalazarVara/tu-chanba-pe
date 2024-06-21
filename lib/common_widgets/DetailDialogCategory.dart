@@ -5,12 +5,14 @@ import 'dart:io';
 import '../../../../common_widgets/CustomButton.dart';
 import '../../../../common_widgets/CustomDropdown.dart';
 import '../../../../common_widgets/CustomTextField.dart';
+import '../../../../common_widgets/CustomMessageDialog.dart';
 
 class DetailDialogCategory extends StatefulWidget {
   final String title;
   final String name;
   final String image;
   final VoidCallback onDelete;
+  final VoidCallback onSave;
 
   const DetailDialogCategory({
     Key? key,
@@ -18,6 +20,7 @@ class DetailDialogCategory extends StatefulWidget {
     required this.name,
     required this.image,
     required this.onDelete,
+    required this.onSave,
   }) : super(key: key);
 
   @override
@@ -109,7 +112,18 @@ class _DetailDialogCategoryState extends State<DetailDialogCategory> {
               CustomButton(
                 text: 'Guardar',
                 onPressed: () {
-                  // Implementa la lógica de guardar los cambios
+                  showDialog(
+                    context: context,
+                    builder: (context) => CustomMessageDialog(
+                      message: '¿Estás seguro/a de que deseas guardar los cambios?',
+                      onConfirm: () {
+                        // Llama a la función de guardado pasada como parámetro
+                        widget.onSave();
+                        Navigator.of(context).pop(); // Cierra el CustomMessageDialog
+                        Navigator.of(context).pop(); // Cierra el DetailDialogCategory
+                      },
+                    ),
+                  );
                 },
               ),
             ],

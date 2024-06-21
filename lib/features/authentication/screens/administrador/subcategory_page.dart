@@ -2,11 +2,17 @@ import 'package:flutter/material.dart';
 
 import '../../../../common_widgets/DetailDialogCategory.dart';
 import '../../../../common_widgets/TopBar.dart';
+import '../../../../common_widgets/CategoryListItem.dart';
 
 class SubcategoryPage extends StatelessWidget {
   final String categoryName;
 
   const SubcategoryPage({Key? key, required this.categoryName}) : super(key: key);
+
+  void _saveSubcategory() {
+    // Implementa la lógica de guardar la subcategoría en la base de datos
+    // Por ejemplo: saveSubcategoryToDatabase();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +31,7 @@ class SubcategoryPage extends StatelessWidget {
                 // Implementa la lógica para eliminar la subcategoría
                 Navigator.pop(context); // Cierra el diálogo después de eliminar
               },
+              onSave: _saveSubcategory,  // Añadido
             ),
           );
         },
@@ -32,7 +39,9 @@ class SubcategoryPage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          GestureDetector(
+          CategoryListItem(
+            name: 'Subcategoría 1',
+            imagePath: 'assets/images/default.png',
             onTap: () {
               showDialog(
                 context: context,
@@ -44,36 +53,13 @@ class SubcategoryPage extends StatelessWidget {
                     // Implementa la lógica para eliminar la subcategoría
                     Navigator.pop(context); // Cierra el diálogo después de eliminar
                   },
+                  onSave: _saveSubcategory,  // Añadido
                 ),
               );
             },
-            child: Container(
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    backgroundImage: AssetImage('assets/images/default.png'),
-                    radius: 30,
-                  ),
-                  SizedBox(width: 16),
-                  Expanded(
-                    child: Text(
-                      'Subcategoría 1',
-                      style: TextStyle(
-                        fontFamily: 'Mont-Bold',
-                        fontSize: 18,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                  Icon(Icons.more_vert, color: Colors.black),
-                ],
-              ),
-            ),
+            onMorePressed: () {
+              // Implementa la lógica para el botón de más opciones
+            },
           ),
           // Añade más subcategorías según sea necesario
         ],
@@ -81,4 +67,3 @@ class SubcategoryPage extends StatelessWidget {
     );
   }
 }
-

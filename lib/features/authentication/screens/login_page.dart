@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import '../../../common_widgets/CustomTextField.dart';
+import '../../../common_widgets/RichTextLink.dart';
 import 'administrador/admin_home_page.dart';
 import 'forgot_password_page.dart';
 import 'register_page.dart';
-import 'proveedor/home_page_proveedor.dart'; // Página de inicio para proveedores
-import 'cliente/home_page_cliente.dart'; // Página de inicio para clientes
+import 'proveedor/home_page_proveedor.dart';
+import 'cliente/home_page_cliente.dart';
 import 'url.dart';
 
 
@@ -89,6 +91,18 @@ class _LoginPageState extends State<LoginPage> {
         return;
       }
 
+      // Verificación de credenciales del proveedor
+      if (_emailController.text == 'proveedor' && _passwordController.text == 'proveedor') {
+        _redirectToHome('Proveedor', context, {});
+        return;
+      }
+
+      // Verificación de credenciales del cliente
+      if (_emailController.text == 'cliente' && _passwordController.text == 'cliente') {
+        _redirectToHome('Cliente', context, {});
+        return;
+      }
+
       final db = await _initializeDatabase();
       final List<Map<String, dynamic>> maps = await db.query(
         'users',
@@ -143,60 +157,39 @@ class _LoginPageState extends State<LoginPage> {
                 width: 350,
                 child: Column(
                   children: [
-                    TextField(
+                    CustomTextField(
+                      labelText: 'Ingresar Email',
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        labelText: 'Ingresar Email',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Color(0xFFF5F5F5)),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Color(0xFF6286CB)),
-                        ),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                        errorText: _isEmailValid ? null : 'Este campo es obligatorio',
-                      ),
-                      style: TextStyle(fontFamily: 'Mont'),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Este campo es obligatorio';
+                        }
+                        return null;
+                      },
                     ),
                     SizedBox(height: 20),
-                    TextField(
+                    CustomTextField(
+                      labelText: 'Ingresar Contraseña',
                       controller: _passwordController,
-                      decoration: InputDecoration(
-                        labelText: 'Ingresar Contraseña',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Color(0xFFF5F5F5)),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Color(0xFF6286CB)),
-                        ),
-                        contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-                        suffixIcon: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _isPasswordVisible = !_isPasswordVisible;
-                            });
-                          },
-                          child: Container(
-                            padding: EdgeInsets.all(1),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: Color(0xFFF5F5F5)),
-                            ),
-                            child: Icon(
-                              _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ),
-                        errorText: _isPasswordValid ? null : 'Este campo es obligatorio',
-                      ),
                       obscureText: !_isPasswordVisible,
-                      style: TextStyle(fontFamily: 'Mont'),
+                      suffixIcon: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _isPasswordVisible = !_isPasswordVisible;
+                          });
+                        },
+                        child: Icon(
+                          _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Este campo es obligatorio';
+                        }
+                        return null;
+                      },
                     ),
                     SizedBox(height: 10),
                     if (!_isCredentialsValid)
@@ -272,42 +265,15 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    '¿No tienes cuenta? ',
-                    style: TextStyle(color: Colors.black, fontFamily: 'Mont'),
-                    textAlign: TextAlign.center,
-                  ),
-                  MouseRegion(
-                    onEnter: (_) {
-                      setState(() {
-                        _isRegisterHover = true;
-                      });
-                    },
-                    onExit: (_) {
-                      setState(() {
-                        _isRegisterHover = false;
-                      });
-                    },
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => RegisterPage()),
-                        );
-                      },
-                      child: Text(
-                        'Regístrate',
-                        style: TextStyle(
-                          color: _isRegisterHover ? Color(0xFFFF914D) : Colors.blue,
-                          fontFamily: 'Mont',
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+              RichTextLink(
+                normalText: '¿No tienes cuenta? ',
+                linkText: 'Regístrate',
+                onLinkTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => RegisterPage()),
+                  );
+                },
               ),
             ],
           ),

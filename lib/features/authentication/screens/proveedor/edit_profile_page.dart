@@ -1,6 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../../common_widgets/CustomButton.dart';
+import '../../../../common_widgets/CustomDropdown.dart';
+import '../../../../common_widgets/CustomTextField.dart';
+import '../../../../common_widgets/TopBar.dart';
+import '../../../../common_widgets/CustomMessageDialog.dart';
 
 class EditProfilePage extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -50,7 +55,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   Future<void> _pickImage() async {
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
-
     if (pickedFile != null) {
       setState(() {
         _profileImage = File(pickedFile.path);
@@ -58,12 +62,29 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
   }
 
+  void _showConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CustomMessageDialog(
+          message: '¿Está seguro que desea guardar los cambios?',
+          onConfirm: _saveProfile,
+        );
+      },
+    );
+  }
+
+  void _saveProfile() {
+    print("Profile saved!");
+    // Aquí puedes implementar la lógica para guardar los datos en la base de datos
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Editar Perfil', style: TextStyle(fontFamily: 'Mont-Bold')),
-        backgroundColor: Color(0xFF6286CB),
+      appBar: TopBar(
+        title: 'Editar Perfil',
+        showBackButton: true,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -99,34 +120,78 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 ],
               ),
               SizedBox(height: 20),
-              _buildTextField(_nameController, 'Nombres'),
-              _buildTextField(_surnameController, 'Apellidos'),
-              _buildTextField(_emailController, 'Dirección de correo'),
-              _buildTextField(_contactNumberController, 'Número de Contacto'),
-              _buildDropdown('Departamento', _selectedDepartment, (String? newValue) {
-                setState(() {
-                  _selectedDepartment = newValue;
-                  // Update _selectedProvince based on selected department
-                });
-              }),
-              _buildDropdown('Provincia', _selectedProvince, (String? newValue) {
-                setState(() {
-                  _selectedProvince = newValue;
-                });
-              }),
-              _buildTextField(_addressController, 'Dirección del Contacto'),
-              _buildTextField(_whyChooseMeController, '¿Por qué elegirme?', maxLines: 3),
-              _buildTextField(_aboutMeController, 'Sobre ti', maxLines: 3),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  // Implement save functionality
+              CustomTextField(
+                labelText: 'Nombres',
+                controller: _nameController,
+              ),
+              SizedBox(height: 8),
+              CustomTextField(
+                labelText: 'Apellidos',
+                controller: _surnameController,
+              ),
+              SizedBox(height: 8),
+              CustomTextField(
+                labelText: 'Dirección de correo',
+                controller: _emailController,
+              ),
+              SizedBox(height: 8),
+              CustomTextField(
+                labelText: 'Número de Contacto',
+                controller: _contactNumberController,
+              ),
+              SizedBox(height: 8),
+              CustomDropdown(
+                labelText: 'Departamento',
+                value: _selectedDepartment,
+                items: ['Option 1', 'Option 2', 'Option 3']
+                    .map((String value) => DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                ))
+                    .toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedDepartment = newValue;
+                  });
                 },
-                child: Text('Guardar cambios', style: TextStyle(color: Colors.white)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF6286CB),
-                  padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                ),
+              ),
+              SizedBox(height: 8),
+              CustomDropdown(
+                labelText: 'Provincia',
+                value: _selectedProvince,
+                items: ['Option 1', 'Option 2', 'Option 3']
+                    .map((String value) => DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                ))
+                    .toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedProvince = newValue;
+                  });
+                },
+              ),
+              SizedBox(height: 8),
+              CustomTextField(
+                labelText: 'Dirección del Contacto',
+                controller: _addressController,
+              ),
+              SizedBox(height: 8),
+              CustomTextField(
+                labelText: '¿Por qué elegirme?',
+                controller: _whyChooseMeController,
+                maxLines: 3,
+              ),
+              SizedBox(height: 8),
+              CustomTextField(
+                labelText: 'Sobre ti',
+                controller: _aboutMeController,
+                maxLines: 3,
+              ),
+              SizedBox(height: 20),
+              CustomButton(
+                text: 'Guardar cambios',
+                onPressed: _showConfirmationDialog,
               ),
             ],
           ),
@@ -134,38 +199,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
       ),
     );
   }
-
-  Widget _buildTextField(TextEditingController controller, String labelText, {int maxLines = 1}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextField(
-        controller: controller,
-        maxLines: maxLines,
-        decoration: InputDecoration(
-          labelText: labelText,
-          border: OutlineInputBorder(),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDropdown(String labelText, String? value, ValueChanged<String?> onChanged) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: DropdownButtonFormField<String>(
-        decoration: InputDecoration(
-          labelText: labelText,
-          border: OutlineInputBorder(),
-        ),
-        value: value,
-        onChanged: onChanged,
-        items: <String>['Option 1', 'Option 2', 'Option 3'].map<DropdownMenuItem<String>>((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(value),
-          );
-        }).toList(),
-      ),
-    );
-  }
 }
+
+
