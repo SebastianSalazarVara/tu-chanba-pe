@@ -27,7 +27,7 @@ class _HomePageProveedorState extends State<HomePageProveedor> {
     _user = widget.user;
     _pages = [
       PagosPage(),
-      ReservacionesPage(),
+      ReservacionesPage(user: widget.user),
       PerfilPage(user: widget.user), // Aquí puedes usar widget.user
     ];
   }

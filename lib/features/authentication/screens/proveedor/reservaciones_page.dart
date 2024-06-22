@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../url.dart';
+
 class ReservacionesPage extends StatefulWidget {
+  final Map<String, dynamic> user;
+
+  ReservacionesPage({required this.user});
   @override
   _ReservacionesPageState createState() => _ReservacionesPageState();
 }
@@ -33,6 +40,18 @@ class _ReservacionesPageState extends State<ReservacionesPage> {
   ];
 
   final Set<String> filtrosSeleccionados = {};
+
+  final List<dynamic> reservations=[];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadServiceData();
+  }
+
+  void _loadServiceData(){
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -375,6 +394,6 @@ class ReservaDetallesPage extends StatelessWidget {
 
 void main() {
   runApp(MaterialApp(
-    home: ReservacionesPage(),
+    home: ReservacionesPage(user: {}),
   ));
 }
