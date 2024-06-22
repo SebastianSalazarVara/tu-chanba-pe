@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'home_page_cliente.dart'; // Importa la HomePageCliente que contiene la navegación por pestañas
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../url.dart';
 
 class ChangePasswordPage extends StatefulWidget {
+  final String email;
+
+  ChangePasswordPage({required this.email});
+
   @override
   _ChangePasswordPageState createState() => _ChangePasswordPageState();
 }
@@ -114,10 +121,46 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   }
 
   String? _validateOldPassword(String? value) {
+    
     if (value != '123456') {
       return 'Contraseña incorrecta';
     }
     return null;
+  }
+
+//ESTA ERA LA FUNCIONALIDAD PARA CAMBIAR LA CONTRASEÑA OSEA QUE DE UNA VEZ
+//QUE SE ENVIE LA CONTRASEÑA ANTIGUA Y LA NUEVA A LA BASE DE DATOS Y QUE ESTE BOTE VERDADERO O FALSO
+//El email o correo esta en el widget.email
+  Future<bool> _changePassword(String mail, String oldPassword, String newPassword) async {
+    var url1= ruta+'/sesion';
+    final uri = Uri.parse(url1);
+    final client = http.Client();
+    try{
+      final response = await client.put(
+        uri,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'correo': mail,
+          'password_old': oldPassword,
+          'password_new': newPassword,
+        }),
+      );
+      if(response.statusCode==200){
+        var data = jsonDecode(response.body);
+        bool apiResult =data.toLowerCase() == 'true';
+        return apiResult;
+      }else{
+        return false;
+      }
+    }
+    catch(e){
+      return false;
+    }
+    finally{
+      client.close();
+    }
   }
 
   String? _validateNewPassword(String? value) {

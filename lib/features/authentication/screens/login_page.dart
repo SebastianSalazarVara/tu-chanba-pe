@@ -8,7 +8,10 @@ import 'forgot_password_page.dart';
 import 'register_page.dart';
 import 'proveedor/home_page_proveedor.dart';
 import 'cliente/home_page_cliente.dart';
+
 import 'url.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 
 class LoginPage extends StatefulWidget {
@@ -89,6 +92,52 @@ class _LoginPageState extends State<LoginPage> {
       if (_emailController.text == 'administrador' && _passwordController.text == 'administrador') {
         _redirectToHome('Administrador', context, {});
         return;
+      }
+
+      var url1=ruta+"/sesion";
+      final uri = Uri.parse(url1);
+      final client = http.Client();
+      try{
+        final response= await client.post(
+        uri,
+        body: jsonEncode({
+          'correo': _emailController.text,
+          'contrasena': _passwordController.text,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        );
+        if(response.statusCode==200){
+          final body = jsonDecode(response.body);
+          print("datos de regreso "+ body.toString());
+          final userType = body['tipoUsuario'];
+          final idUsuario = body['idUsuario'];
+          final response2= await client.get(
+            Uri.parse(ruta+"/usuario/"+idUsuario.toString()),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          );
+          final body2 = jsonDecode(response2.body);
+          final name = "${body2['nombre']} ${body2['apellido']}";
+          Map<String, dynamic> userInfo = {
+            'email': _emailController.text,
+            'name': name,
+            'idUsuario': idUsuario.toString(),
+          };
+          _redirectToHome(userType, context, userInfo);
+        }else{
+          setState(() {
+            _isCredentialsValid = false;
+          });
+        }
+      }
+        catch(e){
+        print("No se inicio sesion: "+ e.toString());
+      }
+      finally{
+        client.close();
       }
 
       // Verificación de credenciales del proveedor

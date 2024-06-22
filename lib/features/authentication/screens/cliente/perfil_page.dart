@@ -155,7 +155,7 @@ class _PerfilPageState extends State<PerfilPage> {
   }
 
   void _navigateToChangePasswordPage() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => ChangePasswordPage()));
+    Navigator.push(context, MaterialPageRoute(builder: (context) => ChangePasswordPage(email: widget.user['email'])));
   }
 
   void _showLogoutConfirmationDialog() {

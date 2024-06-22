@@ -26,8 +26,8 @@ class _HomePageClienteState extends State<HomePageCliente> {
     _selectedIndex = widget.initialIndex;
     _user = widget.user;
     _pages = [
-      ServiciosPage(),
-      ReservacionesPage(),
+      ServiciosPage(user: widget.user),
+      ReservacionesPage(user: widget.user),
       PerfilPage(user: widget.user), // Aquí puedes usar widget.user
     ];
   }

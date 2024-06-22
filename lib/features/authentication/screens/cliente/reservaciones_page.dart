@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../url.dart';
+
 
 class ReservacionesPage extends StatefulWidget {
+  final Map<String, dynamic> user;
+
+  ReservacionesPage({required this.user});
+
   @override
   _ReservacionesPageState createState() => _ReservacionesPageState();
 }
@@ -28,7 +36,45 @@ class _ReservacionesPageState extends State<ReservacionesPage> {
     "Aceptado"
   ];
 
+  final List<dynamic> reservas=[];
+
   final Set<String> filtrosSeleccionados = {};
+
+  @override
+  void initState() {
+    super.initState();
+    String idUsuario=_getIdUsuario();
+    _loadServiceData(idUsuario);
+  }
+
+
+  String _getIdUsuario(){
+    return widget.user['idUsuario'];
+  }
+
+  void _loadServiceData(String idUsuario) async {
+    var url1=ruta+"/reservacionesproveedor/"+idUsuario;
+    final uri = Uri.parse(url1);
+    final client = new http.Client();
+    try{
+      final response = await client.get(uri);
+      final decodedData = json.decode(response.body);
+      if(response.statusCode==200){
+        setState(() {
+          reservas.addAll(decodedData);
+        });
+        print("MOSTRANDO LAS RESERVAS OBTENIDAS");
+        print(reservas);
+      }
+    }
+    catch(e){
+      print("hay un error y es "+ e.toString());
+    }
+    finally{
+      client.close();
+    }
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -368,6 +414,6 @@ class ReservaDetallesPage extends StatelessWidget {
 
 void main() {
   runApp(MaterialApp(
-    home: ReservacionesPage(),
+    home: ReservacionesPage(user: {}),
   ));
 }
