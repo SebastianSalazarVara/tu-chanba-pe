@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tuchanbape/features/authentication/screens/login_page.dart';
-import '../../../../common_widgets/AvailabilityOption.dart';
 import '../../../../common_widgets/LogoutConfirmationDialog.dart';
 import '../../../../common_widgets/MenuItem.dart';
-import '../../../../common_widgets/TopBar.dart';
 import 'edit_profile_page.dart';  // Importa EditProfilePage
 import 'change_password_page.dart';
 import 'billing_info_page.dart';  // Página de información de cobro
@@ -69,10 +67,6 @@ class _PerfilPageState extends State<PerfilPage> {
             Text(name, style: TextStyle(fontFamily: 'Mont-Bold', fontSize: 20)),
             Text(email, style: TextStyle(fontFamily: 'Mont-Bold', fontSize: 16, color: Colors.grey)),
             SizedBox(height: 30),
-            AvailabilityOption(
-              availableText: 'Estado disponible',
-              unavailableText: 'Estado no disponible',
-            ),
             MenuItem(
               icon: Icons.build,
               title: 'Servicios',
@@ -174,4 +168,5 @@ class _PerfilPageState extends State<PerfilPage> {
     );
   }
 }
+
 

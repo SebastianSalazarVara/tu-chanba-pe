@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'ReservaServicioPage.dart';
-
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../url.dart';
@@ -15,7 +14,6 @@ class ServiciosPage extends StatefulWidget {
 }
 
 class _ServiciosPageState extends State<ServiciosPage> {
-  List<bool> _isFavorite = [false];
   double _minPrice = 0;
   double _maxPrice = 5000;
   RangeValues _priceRange = RangeValues(0, 5000);
@@ -118,32 +116,16 @@ class _ServiciosPageState extends State<ServiciosPage> {
                   ),
                   SizedBox(height: 4),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          // Uncomment this section to display the image if URLs are provided
-                          // CircleAvatar(
-                          //   backgroundImage: NetworkImage(service['foto']), // Imagen del proveedor
-                          //   radius: 15,
-                          // ),
-                          SizedBox(width: 8),
-                          Text(
-                            service['usuario']['nombre'] + ' ' + service['usuario']['apellido'], // Nombre del proveedor
-                            style: TextStyle(fontFamily: 'Mont-Regular'),
-                          ),
-                        ],
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          _isFavorite[index] ? Icons.favorite : Icons.favorite_border,
-                          color: _isFavorite[index] ? Colors.red : Colors.grey,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _isFavorite[index] = !_isFavorite[index];
-                          });
-                        },
+                      // Uncomment this section to display the image if URLs are provided
+                      // CircleAvatar(
+                      //   backgroundImage: NetworkImage(service['foto']), // Imagen del proveedor
+                      //   radius: 15,
+                      // ),
+                      SizedBox(width: 8),
+                      Text(
+                        service['usuario']['nombre'] + ' ' + service['usuario']['apellido'], // Nombre del proveedor
+                        style: TextStyle(fontFamily: 'Mont-Regular'),
                       ),
                     ],
                   ),
@@ -156,4 +138,3 @@ class _ServiciosPageState extends State<ServiciosPage> {
     );
   }
 }
-
