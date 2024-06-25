@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../url.dart';
-
+import 'package:url_launcher/url_launcher.dart'; // Import para llamadas
 
 class ReservacionesPage extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -15,9 +15,7 @@ class ReservacionesPage extends StatefulWidget {
 
 class _ReservacionesPageState extends State<ReservacionesPage> {
   final Map<String, dynamic> reserva = {
-    "estado": "En Espera",
     "precio": "S/ 500.00",
-    "precioAdelantado": "S/ 250.00",
     "direccion": "Calle 123 asd",
     "fecha": "15 de octubre, 2024",
     "hora": "16:00 pm",
@@ -25,89 +23,66 @@ class _ReservacionesPageState extends State<ReservacionesPage> {
     "correo": "Mateo@user.com",
     "id": "#01010",
     "descripcion": "Se quiere que diseñe y realice un armario con las medidas...",
+    "telefono": "123456789", // Número de teléfono preestablecido
   };
 
-  final List<String> estados = [
-    "Completado",
-    "En Espera",
-    "Cancelado",
-    "Rechazado",
-    "En Progreso",
-    "Aceptado"
-  ];
-
-  final List<dynamic> reservas=[];
-
-  final Set<String> filtrosSeleccionados = {};
+  final List<dynamic> reservas = [];
 
   @override
   void initState() {
     super.initState();
-    String idUsuario=_getIdUsuario();
+    String idUsuario = _getIdUsuario();
     _loadServiceData(idUsuario);
   }
 
-
-  String _getIdUsuario(){
+  String _getIdUsuario() {
     return widget.user['idUsuario'];
   }
 
   void _loadServiceData(String idUsuario) async {
-    var url1=ruta+"/reservacionesproveedor/"+idUsuario;
+    var url1 = ruta + "/reservacionesproveedor/" + idUsuario;
     final uri = Uri.parse(url1);
-    final client = new http.Client();
-    try{
+    final client = http.Client();
+    try {
       final response = await client.get(uri);
       final decodedData = json.decode(response.body);
-      if(response.statusCode==200){
+      if (response.statusCode == 200) {
         setState(() {
           reservas.addAll(decodedData);
         });
         print("MOSTRANDO LAS RESERVAS OBTENIDAS");
         print(reservas);
       }
-    }
-    catch(e){
-      print("hay un error y es "+ e.toString());
-    }
-    finally{
+    } catch (e) {
+      print("hay un error y es " + e.toString());
+    } finally {
       client.close();
     }
+  }
 
+  void _makePhoneCall(String phoneNumber) async {
+    final Uri phoneUri = Uri(
+      scheme: 'tel',
+      path: phoneNumber,
+    );
+    try {
+      if (await canLaunch(phoneUri.toString())) {
+        await launch(phoneUri.toString());
+      } else {
+        throw 'No se puede hacer la llamada';
+      }
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Reservaciones'),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: GestureDetector(
-              onTap: () => _mostrarFiltros(context),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Color(0xFF6286CB),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: EdgeInsets.all(8),
-                child: Icon(Icons.filter_list, color: Colors.white),
-              ),
-            ),
-          ),
-        ],
-      ),
       body: ListView(
         padding: EdgeInsets.all(8.0),
         children: [
-          GestureDetector(
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => ReservaDetallesPage(reserva: reserva)),
-            ),
-            child: _buildReservacionCard(reserva),
-          ),
+          _buildReservacionCard(reserva),
         ],
       ),
     );
@@ -140,16 +115,9 @@ class _ReservacionesPageState extends State<ReservacionesPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: reserva['estado'] == "Completado" ? Colors.green : Colors.blue,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              reserva['estado'] ?? 'Sin Estado',
-                              style: TextStyle(color: Colors.white),
-                            ),
+                          IconButton(
+                            icon: Icon(Icons.call, color: Color(0xFF6286CB)),
+                            onPressed: () => _makePhoneCall(reserva['telefono'] ?? '123456789'),
                           ),
                           Text(
                             reserva['id'] ?? 'Sin ID',
@@ -215,195 +183,6 @@ class _ReservacionesPageState extends State<ReservacionesPage> {
                   textAlign: TextAlign.right,
                 ),
               ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _mostrarFiltros(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('Filtrado por', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: estados.map((estado) {
-                      final bool isSelected = filtrosSeleccionados.contains(estado);
-                      return FilterChip(
-                        label: Text(estado),
-                        selected: isSelected,
-                        onSelected: (bool selected) {
-                          setState(() {
-                            if (selected) {
-                              filtrosSeleccionados.add(estado);
-                            } else {
-                              filtrosSeleccionados.remove(estado);
-                            }
-                          });
-                        },
-                        checkmarkColor: Colors.white,
-                        selectedColor: Color(0xFF99B2E1),
-                      );
-                    }).toList(),
-                  ),
-                  SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            filtrosSeleccionados.clear();
-                          });
-                        },
-                        child: Text('Limpiar Filtros'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey,
-                        ),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          setState(() {});
-                        },
-                        child: Text('Aplicar'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFF6286CB),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-}
-
-class ReservaDetallesPage extends StatelessWidget {
-  final Map<String, dynamic> reserva;
-
-  ReservaDetallesPage({required this.reserva});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(reserva['estado'] ?? 'Sin Estado'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("ID de Reserva", style: TextStyle(fontWeight: FontWeight.bold)),
-                Text(reserva['id'] ?? 'Sin ID', style: TextStyle(fontWeight: FontWeight.bold)),
-              ],
-            ),
-            SizedBox(height: 16),
-            Text("Armarios y vestidores a medida", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-            SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Día:", style: TextStyle(fontWeight: FontWeight.bold)),
-                    Text(reserva['fecha'] ?? 'Sin Fecha'),
-                    SizedBox(height: 8),
-                    Text("Hora:", style: TextStyle(fontWeight: FontWeight.bold)),
-                    Text(reserva['hora'] ?? 'Sin Hora'),
-                  ],
-                ),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8.0),
-                  child: Image.asset(
-                    'assets/images/armarios.png',
-                    width: 100,
-                    height: 100,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
-            Text("Cliente", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            Card(
-              child: ListTile(
-                leading: CircleAvatar(
-                  backgroundImage: AssetImage('assets/images/cliente.png'), // Imagen del cliente
-                ),
-                title: Text(reserva['proveedor'] ?? 'Sin Proveedor'),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(reserva['correo'] ?? 'Sin Correo'),
-                    Text(reserva['direccion'] ?? 'Sin Dirección'),
-                  ],
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.call),
-                      onPressed: () {
-                        // Acción para llamar al cliente
-                      },
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.chat),
-                      onPressed: () {
-                        // Acción para chatear con el cliente
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 16),
-            Text("Descripción de la Reserva", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            Text(reserva['descripcion'] ?? 'Sin Descripción'),
-            SizedBox(height: 16),
-            Text("Detalles del Precio", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("Precio Total:", style: TextStyle(fontWeight: FontWeight.bold)),
-                Text(reserva['precio'] ?? 'S/ 0.00'),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("Pago Adelantado:", style: TextStyle(fontWeight: FontWeight.bold)),
-                Text(reserva['precioAdelantado'] ?? 'S/ 0.00'),
-              ],
-            ),
-            SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                // Acción para confirmar el pago
-              },
-              child: Text('Pago Confirmado'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF6286CB),
-              ),
             ),
           ],
         ),

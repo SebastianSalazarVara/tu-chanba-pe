@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'edit_profile_page.dart';
 import '../login_page.dart';
 import 'change_password_page.dart';
-import 'favorite_providers_page.dart';
-import 'favorite_services_page.dart';
-import 'reviews_page.dart';
 
 class PerfilPage extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -26,6 +23,7 @@ class _PerfilPageState extends State<PerfilPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -63,27 +61,7 @@ class _PerfilPageState extends State<PerfilPage> {
             Text(widget.user['name'], style: TextStyle(fontFamily: 'Mont-Bold', fontSize: 20)),
             Text(widget.user['email'], style: TextStyle(fontFamily: 'Mont-Bold', fontSize: 16, color: Colors.grey)),
             SizedBox(height: 30),
-            _buildProfileOption(Icons.favorite, 'Servicios Favoritos', _isOptionSelected1, () {
-              setState(() {
-                _isOptionSelected1 = !_isOptionSelected1;
-              });
-              _resetSelectionAfterDelay();
-              _navigateToFavoriteServicesPage();
-            }),
-            _buildProfileOption(Icons.favorite_border, 'Proveedores Favoritos', _isOptionSelected2, () {
-              setState(() {
-                _isOptionSelected2 = !_isOptionSelected2;
-              });
-              _resetSelectionAfterDelay();
-              _navigateToFavoriteProvidersPage();
-            }),
-            _buildProfileOption(Icons.rate_review, 'Mis reseñas', _isOptionSelected3, () {
-              setState(() {
-                _isOptionSelected3 = !_isOptionSelected3;
-              });
-              _resetSelectionAfterDelay();
-              _navigateToReviewsPage();
-            }),
+            // Eliminar opciones de Servicios Favoritos, Proveedores Favoritos y Mis reseñas
             _buildProfileOption(Icons.lock, 'Cambiar Contraseña', _isOptionSelected4, () {
               setState(() {
                 _isOptionSelected4 = !_isOptionSelected4;
@@ -140,18 +118,6 @@ class _PerfilPageState extends State<PerfilPage> {
         _isLoggingOut = false;
       });
     });
-  }
-
-  void _navigateToFavoriteServicesPage() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => FavoriteServicesPage()));
-  }
-
-  void _navigateToFavoriteProvidersPage() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => FavoriteProvidersPage()));
-  }
-
-  void _navigateToReviewsPage() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => ReviewsPage()));
   }
 
   void _navigateToChangePasswordPage() {
